@@ -1,4 +1,4 @@
-import BadgeDialog from '../components/BadgeDialog';
+import { router } from '@kit.ArkUI';
 
 // 登录页面
 @Entry
@@ -8,7 +8,6 @@ struct Index {
   @State password: string = '';
   @State isAgreed: boolean = false;
   @State showPassword: boolean = false;
-  @State showBadgeDialog: boolean = true;
 
   build() {
     Stack({ alignContent: Alignment.Center }) {
@@ -228,6 +227,10 @@ struct Index {
             .onClick(() => {
               // 微信登录
               console.log('微信登录')
+              router.pushUrl({
+                url: 'pages/FindPage',
+                params: {}
+              })
             })
             .width('90%')
             .height(48)
@@ -243,19 +246,11 @@ struct Index {
         }
         .width('100%')
         .alignItems(HorizontalAlign.Center)
-
-        // 弹框组件
-        if (this.showBadgeDialog) {
-          BadgeDialog({
-            onClose: (isShow: boolean) => {
-              this.showBadgeDialog = isShow // 通过回调修改状态
-            }
-          });
-        }
       }
       .width('100%')
       .height('100%')
       .backgroundColor('#FFFFFF')
+
     }
     .width('100%')
     .height('100%')
