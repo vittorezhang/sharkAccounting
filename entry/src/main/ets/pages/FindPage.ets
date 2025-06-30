@@ -1,8 +1,17 @@
 import TabBarComponent from '../components/TabBarComponent'
+import { iconItem } from '../viewModel/commonFunction'
 
 @Entry
 @Component
 struct FinanceApp {
+  private commonFunctionList: iconItem[] = [
+    { name: '省钱优惠券', icon: 'app.media.coupon_icon' },
+    { name: '资产管家', icon: 'app.media.asset_icon' },
+    { name: '发票助手', icon: 'app.media.invoice_icon' },
+    { name: '房贷计算器', icon: 'app.media.loan_icon' },
+    { name: '汇率计算器', icon: 'app.media.exchange_icon' },
+  ]
+
   build() {
     Column() {
       // 1. 顶部黄色标题栏
@@ -17,136 +26,232 @@ struct FinanceApp {
       // 2. 主内容区
       Scroll() {
         Column() {
-          // 2.1 账单模块
+          // 2.1 账单
           Column() {
-            Row() {
-              Text('账单').fontSize(16).fontColor('#333333')
-              Text('06月').fontSize(14).fontColor('#666666').margin({ left: 8 })
-            }
-            .margin({ bottom: 16 })
-
-            Row() {
-              Column() {
-                Text('收入').fontSize(14).fontColor('#999999')
-                Text('198.00').fontSize(18).fontColor('#FF6B6B')
-              }
-
-              Column() {
-                Text('支出').fontSize(14).fontColor('#999999')
-                Text('0.00').fontSize(18).fontColor('#4CAF50')
-              }
-
-              Column() {
-                Text('结余').fontSize(14).fontColor('#999999')
-                Text('198.00').fontSize(18).fontColor('#333333')
-              }
-            }
-            .justifyContent(FlexAlign.SpaceAround)
-          }
-          .padding(16)
-
-          // 2.2 预算模块
-          Column() {
-            Row() {
-              Text('06月总预算').fontSize(16).fontColor('#333333')
-            }
-            .margin({ bottom: 16 })
-
+            // 账单表格
             Column() {
               Row() {
-                Text('剩余预算:').fontSize(14).fontColor('#999999')
-                Text('999.00').fontSize(14).fontColor('#333333').margin({ left: 8 })
+                Text('账单')
+                  .fontSize(18)
+                  .fontWeight(500)
+                  .margin({ left: 12 })
+                // 右侧箭头图标
+                Image($r('app.media.ic_arrow_right'))
+                  .width(20)
+                  .height(20)
+                  .margin({ right: 12 })
               }
+              .width('100%')
+              .height(48)
+              // .backgroundColor('#FFD700')
+              .justifyContent(FlexAlign.SpaceBetween)
+              .alignItems(VerticalAlign.Center)
 
+              // 表头
               Row() {
-                Text('本月预算:').fontSize(14).fontColor('#999999')
-                Text('999.00').fontSize(14).fontColor('#333333').margin({ left: 8 })
+                Text('').width('25%').textAlign(TextAlign.Center)
+                Text('收入').width('25%').textAlign(TextAlign.Center)
+                Text('支出').width('25%').textAlign(TextAlign.Center)
+                Text('结余').width('25%').textAlign(TextAlign.Center)
               }
+              .width('100%')
+              .height(40)
 
+              // 表格内容
               Row() {
-                Text('本月支出:').fontSize(14).fontColor('#999999')
-                Text('0.00').fontSize(14).fontColor('#333333').margin({ left: 8 })
+                Row() {
+                  Text('06').fontWeight(FontWeight.Bold).fontSize(22)
+                  Text('月').padding({ left: 8 })
+                  // 左侧横线
+                  Divider()
+                    .vertical(true)
+                    .strokeWidth(1)
+                    .color('#E5E5E5')
+                    .width(1)
+                    .padding({ left: 16 })
+                }
+                .padding({ left: 16, bottom: 12 })
+                .justifyContent(FlexAlign.Center)
+                .width('25%')
+
+
+                Text('198.00').width('25%').textAlign(TextAlign.Center)
+                Text('0.00').width('25%').textAlign(TextAlign.Center)
+                Text('198.00').width('25%').textAlign(TextAlign.Center)
               }
+              .width('100%')
+              .height(40)
             }
+            .border({ width: 1, color: '#E5E5E5' })
+            .borderRadius(8)
+            .width('92%')
+            .backgroundColor('#FFFFFF')
           }
-          .padding(16)
+          .width('100%')
 
-          // 2.3 资产管家模块
+          //  2.2 预算
           Column() {
-            Row() {
-              Text('资产管家').fontSize(16).fontColor('#333333')
-            }
-            .margin({ bottom: 16 })
-
             Column() {
               Row() {
-                Text('净资产').fontSize(14).fontColor('#999999')
-                Text('800000.00').fontSize(14).fontColor('#333333').margin({ left: 8 })
+                Text('06月总预算')
+                  .fontSize(18)
+                  .fontWeight(500)
+                  .margin({ left: 12 })
+                // 右侧箭头图标
+                Image($r('app.media.ic_arrow_right'))
+                  .width(20)
+                  .height(20)
+                  .margin({ right: 12 })
               }
+              .width('100%')
+              .height(48)
+              .justifyContent(FlexAlign.SpaceBetween)
+              .alignItems(VerticalAlign.Center)
 
+              // 表头
               Row() {
-                Text('资产').fontSize(14).fontColor('#999999')
-                Text('800000.00').fontSize(14).fontColor('#333333').margin({ left: 8 })
+                Text('').width('25%').textAlign(TextAlign.Center)
+                Text('收入').width('25%').textAlign(TextAlign.Center)
+                Text('支出').width('25%').textAlign(TextAlign.Center)
+                Text('结余').width('25%').textAlign(TextAlign.Center)
               }
+              .width('100%')
+              .height(40)
 
+              // 表格内容
               Row() {
-                Text('负债').fontSize(14).fontColor('#999999')
-                Text('0.00').fontSize(14).fontColor('#333333').margin({ left: 8 })
+                Row() {
+                  Text('06').fontWeight(FontWeight.Bold).fontSize(22)
+                  Text('月').padding({ left: 8 })
+                  // 左侧横线
+                  Divider()
+                    .vertical(true)
+                    .strokeWidth(1)
+                    .color('#E5E5E5')
+                    .width(1)
+                    .padding({ left: 16 })
+                }
+                .padding({ left: 16, bottom: 12 })
+                .justifyContent(FlexAlign.Center)
+                .width('25%')
+
+
+                Text('198.00').width('25%').textAlign(TextAlign.Center)
+                Text('0.00').width('25%').textAlign(TextAlign.Center)
+                Text('198.00').width('25%').textAlign(TextAlign.Center)
               }
+              .width('100%')
+              .height(40)
             }
+            .margin({ top: 8 })
+            .border({ width: 1, color: '#E5E5E5' })
+            .borderRadius(8)
+            .backgroundColor('#FFFFFF')
+            .width('92%')
           }
-          .padding(16)
+          .width('100%')
+
+          //  2.3 资产管家
+          Column() {
+            Column() {
+              Row() {
+                Text('资产管家')
+                  .fontSize(18)
+                  .fontWeight(500)
+                  .margin({ left: 12 })
+                // 右侧箭头图标
+                Image($r('app.media.ic_arrow_right'))
+                  .width(20)
+                  .height(20)
+                  .margin({ right: 12 })
+              }
+              .width('100%')
+              .height(48)
+              .justifyContent(FlexAlign.SpaceBetween)
+              .alignItems(VerticalAlign.Center)
+
+              // 表头
+              Row() {
+                Text('').width('25%').textAlign(TextAlign.Center)
+                Text('收入').width('25%').textAlign(TextAlign.Center)
+                Text('支出').width('25%').textAlign(TextAlign.Center)
+                Text('结余').width('25%').textAlign(TextAlign.Center)
+              }
+              .width('100%')
+              .height(40)
+
+              // 表格内容
+              Row() {
+                Row() {
+                  Text('06').fontWeight(FontWeight.Bold).fontSize(22)
+                  Text('月').padding({ left: 8 })
+                  // 左侧横线
+                  Divider()
+                    .vertical(true)
+                    .strokeWidth(1)
+                    .color('#E5E5E5')
+                    .width(1)
+                    .padding({ left: 16 })
+                }
+                .padding({ left: 16, bottom: 12 })
+                .justifyContent(FlexAlign.Center)
+                .width('25%')
+
+
+                Text('198.00').width('25%').textAlign(TextAlign.Center)
+                Text('0.00').width('25%').textAlign(TextAlign.Center)
+                Text('198.00').width('25%').textAlign(TextAlign.Center)
+              }
+              .width('100%')
+              .height(40)
+            }
+            .margin({ top: 8 })
+            .border({ width: 1, color: '#E5E5E5' })
+            .borderRadius(8)
+            .width('92%')
+            .backgroundColor('#FFFFFF')
+          }
+          .width('100%')
 
           // 2.4 常用功能区
           Column() {
-            Row() {
-              Text('常用功能').fontSize(16).fontColor('#333333')
+            Column() {
+              Row() {
+                Text('常用功能')
+                  .fontSize(18)
+                  .fontWeight(500)
+                  .padding({ left: 14, top: 8 })
+              }
+              .width('100%')
+              .justifyContent(FlexAlign.Start)
+
+              Flex({ wrap: FlexWrap.Wrap }) {
+                ForEach(this.commonFunctionList, (item: iconItem, index) => {
+                  Column() {
+                    Image($r(item.icon))
+                      .width(75)
+                      .height(75)
+                      .padding({ left: index === 4 ? 8 : 0 })
+                      .margin({ top: [1, 3].includes(index) ? 3 : [2].includes(index) ? 4 : 0 })
+                  }
+                  .width('25%')
+                  .padding({ bottom: 8 })
+                  .justifyContent(FlexAlign.Center)
+                })
+              }
+              .width('100%')
+              .padding({ left: 16, right: 16 })
             }
-            .margin({ bottom: 16 })
-
-            Grid() {
-              GridItem() {
-                Column() {
-                  // Image($r('app.media.coupon_icon')).width(40).height(40)
-                  Text('省钱优惠券').fontSize(12).margin({ top: 8 })
-                }
-              }
-
-              GridItem() {
-                Column() {
-                  // Image($r('app.media.asset_icon')).width(40).height(40)
-                  Text('资产管家').fontSize(12).margin({ top: 8 })
-                }
-              }
-
-              GridItem() {
-                Column() {
-                  // Image($r('app.media.invoice_icon')).width(40).height(40)
-                  Text('发票助手').fontSize(12).margin({ top: 8 })
-                }
-              }
-
-              GridItem() {
-                Column() {
-                  // Image($r('app.media.loan_icon')).width(40).height(40)
-                  Text('房贷计算器').fontSize(12).margin({ top: 8 })
-                }
-              }
-
-              GridItem() {
-                Column() {
-                  // Image($r('app.media.exchange_icon')).width(40).height(40)
-                  Text('汇率换算器').fontSize(12).margin({ top: 8 })
-                }
-              }
-            }
-            .columnsTemplate('1fr 1fr 1fr')
-            .rowsTemplate('1fr 1fr')
-            .columnsGap(16)
-            .rowsGap(16)
+            .border({ width: 1, color: '#E5E5E5' })
+            .borderRadius(8)
+            .width('92%')
+            .padding({ bottom: 16 })
+            .backgroundColor('#FFFFFF')
           }
-          .padding(16)
+          .width('100%')
+          .margin({ top: 8 })
         }
+        .margin({ bottom: 56 }) // 添加底部边距，为TabBar留出空间
       }
       .layoutWeight(1)
 
@@ -155,6 +260,6 @@ struct FinanceApp {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#FFFFFF')
+    .backgroundColor('#F5F5F5')
   }
 }
