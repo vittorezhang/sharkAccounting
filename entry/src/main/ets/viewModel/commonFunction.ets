@@ -4,3 +4,8 @@ export interface iconItem {
   activeIcon?: string;
   hasRedDot?: boolean;
 }
+
+export interface budgetRowItem {
+  label: string;
+  value: string;
+}
