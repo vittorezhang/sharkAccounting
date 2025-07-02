@@ -228,7 +228,7 @@ struct Index {
               // 微信登录
               console.log('微信登录')
               router.pushUrl({
-                url: 'pages/FindPage',
+                url: 'pages/find',
                 params: {}
               })
             })

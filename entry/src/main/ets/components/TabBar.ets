@@ -1,8 +1,9 @@
 import { TabItem } from '../viewModel/TabBarListModel';
+import { router } from '@kit.ArkUI';
 
 @Component
-export default struct TabBarComponent {
-  @State currentIndex: number = 3 // 默认选中"发现"页
+export default struct TabBar {
+  @Link @Watch('onIndexChange') currentIndex: number // 默认选中"发现"页
   private tabItems: TabItem[] = [
     { name: '明细', icon: 'app.media.bottom_detail_stroke', activeIcon: 'app.media.bottom_detail_fill' },
     { name: '图表', icon: 'app.media.bottom_chart_stroke', activeIcon: 'app.media.bottom_chart_fill' },
@@ -15,6 +16,17 @@ export default struct TabBarComponent {
       hasRedDot: true
     }
   ]
+
+  private getTabRoute(index: number): string {
+    const routes = ['pages/detail', 'pages/chart', 'pages/account', 'pages/find', 'pages/me']
+    return routes[index] || 'pages/find'
+  }
+
+  // 监听Tab切换
+  onIndexChange() {
+    console.log('监听Tab切换', this.currentIndex)
+    router.replaceUrl({ url: this.getTabRoute(this.currentIndex) })
+  }
 
   build() {
     Column() {
