@@ -37,7 +37,18 @@ export interface registerItem {
 }
 
 export interface AuthToken {
+  id: string;
   username: string;
   password: string;
+  nickname?: string;
+  gender?: string;
+  phone?: string;
+  wechat?: string;
+  emergencyContact?: string;
   timestamp: number;
+}
+
+export interface AccountList {
+  currentAccountId: string;
+  accounts: AuthToken[];
 }

@@ -1,17 +1,20 @@
 import { preferences } from '@kit.ArkData';
-import { AuthToken, registerItem } from '../main/ets/viewModel/commonFunction';
+import { AccountList, AuthToken, registerItem } from '../main/ets/viewModel/commonFunction';
 
 export class StorageUtil {
   private static readonly PREFERENCES_NAME = 'my_app_preferences';
   private static readonly AUTH_TOKEN_KEY = 'auth_token';
+  private static readonly ACCOUNT_LIST_KEY = 'account_list';
 
   // 获取Preferences实例（支持多种数据类型）
-  private static async getPreferences(): Promise<preferences.Preferences> {
+  public static async getPreferences(): Promise<preferences.Preferences> {
     return await preferences.getPreferences(
       getContext(),
       StorageUtil.PREFERENCES_NAME
     );
   }
+
+  // ------------------单账户存储-----------------------
 
   // 存储认证信息
   static async setAuthToken(token: AuthToken): Promise<void> {
@@ -87,5 +90,90 @@ export class StorageUtil {
     } catch (error) {
       console.error('[StorageUtil] 清空数据失败:', error);
     }
+  }
+
+  // ------------------多账户存储-----------------------
+
+  private static async saveAccountList(accountList: AccountList): Promise<void> {
+    const pref = await StorageUtil.getPreferences();
+
+    // 完全类型化的保存数据
+    const saveData: AccountList = {
+      currentAccountId: accountList.currentAccountId,
+      accounts: accountList.accounts.map(account => {
+        const savedAccount: AuthToken = {
+          id: account.id,
+          username: account.username,
+          password: account.password,
+          nickname: 'Tao',
+          gender: '男',
+          phone: '未绑定',
+          wechat: 'Tao',
+          emergencyContact: '未设置',
+          timestamp: account.timestamp
+        };
+        return savedAccount;
+      })
+    };
+
+    await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(saveData));
+    await pref.flush();
+  }
+
+  // 获取账户列表（保持图片中的字段默认值）
+  static async getAccountList(): Promise<AccountList> {
+    const pref = await StorageUtil.getPreferences();
+    const value = await pref.get(StorageUtil.ACCOUNT_LIST_KEY, '');
+
+    // 类型安全解析
+    const defaultList: AccountList = {
+      currentAccountId: '',
+      accounts: []
+    };
+
+    if (!value) {
+      return defaultList;
+    }
+
+    try {
+      const parsed = JSON.parse(value.toString()) as AccountList;
+      return {
+        currentAccountId: parsed.currentAccountId || '',
+        accounts: parsed.accounts || []
+      };
+    } catch (e) {
+      console.error('解析账户列表失败:', e);
+      return defaultList;
+    }
+  }
+
+  // 存储多账户信息
+  static async setAccount(token: AuthToken): Promise<void> {
+    const pref = await StorageUtil.getPreferences();
+    const accountList = await StorageUtil.getAccountList();
+
+    // 更新或新增账户
+    const existingIndex = accountList.accounts.findIndex(a => a.id === token.id);
+    if (existingIndex >= 0) {
+      accountList.accounts[existingIndex] = token;
+    } else {
+      accountList.accounts.push(token);
+    }
+
+    await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(accountList));
+    await pref.flush();
+  }
+
+  // 设置当前账户
+  static async setCurrentAccount(id: string): Promise<void> {
+    const accountList = await StorageUtil.getAccountList();
+    accountList.currentAccountId = id;
+    await StorageUtil.saveAccountList(accountList);
+  }
+
+  // 获取当前账户（对应图片中显示的信息）
+  static async getCurrentAccount(): Promise<AuthToken | null> {
+    const accountList = await StorageUtil.getAccountList();
+    return accountList.accounts.find(a => a.id === accountList.currentAccountId) || null;
   }
 }

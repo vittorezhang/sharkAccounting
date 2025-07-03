@@ -7,6 +7,7 @@ import { actionBarItem, operateAreaItem, statsItem } from '../viewModel/commonFu
 @Component
 struct MePage {
   @State private currentIndex: number = 4;
+  @State isLoggedIn: boolean = true;
   @State private isVip: boolean = false; // VIP状态
   @State private stats: statsItem = {
     consecutiveDays: 2,
@@ -39,16 +40,43 @@ struct MePage {
     { name: '去应用市场给鲨鱼记账评分', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
     { name: '关于鲨鱼记账 V5.30.0', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
   ]
-  // 退出登录
-  private handleLogOut = async () => {
-    try {
-      await StorageUtil.clearAuthToken();
-      promptAction.showToast({ message: '退出成功' });
-      router.replaceUrl({ url: 'pages/Index' });
-    } catch (error) {
-      promptAction.showToast({ message: '操作失败，请重试' });
-    }
+  // 注销账户
+  // private handleLogOut = async () => {
+  //   try {
+  //     await StorageUtil.clearAuthToken();
+  //     promptAction.showToast({ message: '退出成功' });
+  //     router.replaceUrl({ url: 'pages/Index' });
+  //   } catch (error) {
+  //     promptAction.showToast({ message: '操作失败，请重试' });
+  //   }
+  // };
+
+  private handleLogOut = () => {
+    this.isLoggedIn = false; // 仅更改登录状态
+    promptAction.showToast({ message: '已退出当前登录' });
+    router.replaceUrl({
+      url: 'pages/Index',
+      params: { keepSession: true } // 传递保持会话参数
+    });
   };
+
+  // 退出确认弹窗
+  private showLogoutConfirm() {
+    promptAction.showDialog({
+      title: '退出登录',
+      message: '确认退出当前登录?',
+      buttons: [
+        { text: '取消', color: '#999999' },
+        { text: '确认退出', color: '#FF6B6B' }
+      ]
+    }).then(result => {
+      // 点击确定
+      if (result.index === 1) {
+        this.handleLogOut()
+      }
+    });
+  }
+
   // 升级VIP
   private handleUpgrade = () => {
     promptAction.showToast({ message: '跳转VIP购买页' });
@@ -329,8 +357,10 @@ struct MePage {
               color: '#FF6B6B',
               radius: 8
             })
-            .margin({ bottom: 24 })
-            .onClick(this.handleLogOut)
+            .margin({ bottom: 24 })// .onClick(this.handleLogOut)
+            .onClick(() => {
+              this.showLogoutConfirm()
+            })
 
           // 3. 底部TabBar
           TabBar({ currentIndex: $currentIndex })

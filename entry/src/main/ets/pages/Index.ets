@@ -1,6 +1,6 @@
 import { router, promptAction } from '@kit.ArkUI';
 import { StorageUtil } from '../../../utils/storage';
-import { registerItem } from '../viewModel/commonFunction';
+import { AuthToken, registerItem } from '../viewModel/commonFunction';
 
 // 登录页面
 @Entry
@@ -10,6 +10,8 @@ struct IndexPage {
   @State password: string = '';
   @State isAgreed: boolean = false;
   @State showErrors: boolean = false;
+  @State showSessionTip: boolean = false;
+  @State accountList: AuthToken[] = []; // 明确定义类型
 
   // 校验规则
   private validateForm(): boolean {
@@ -23,6 +25,40 @@ struct IndexPage {
     return Object.values(validations).every((v: registerItem) => v);
   }
 
+  async aboutToAppear() {
+    const params = router.getParams() as Record<string, string> | undefined;
+    if (params?.keepSession) {
+      // 显示保持会话的UI提示
+      this.showSessionTip = true;
+    }
+    await this.loadAccounts();
+    this.setupDataListener(); // 初始化监听
+  }
+
+  async onPageShow() {
+    await this.loadAccounts();
+  }
+
+  async onPageHide() {
+    const pref = await StorageUtil.getPreferences();
+    pref?.off('change'); // 避免内存泄漏
+  }
+
+  private async setupDataListener() {
+    const pref = await StorageUtil.getPreferences();
+    pref?.on('change', () => this.loadAccounts());
+  }
+
+  private async loadAccounts() {
+    try {
+      const result = await StorageUtil.getAccountList();
+      console.log('accounts', JSON.stringify(result))
+      this.accountList = result.accounts;
+    } catch (error) {
+      console.error('加载账户列表失败:', error);
+    }
+  }
+
   // 登录逻辑
   private async handleLogin() {
     if (!this.validateForm()) {
@@ -30,46 +66,45 @@ struct IndexPage {
       return;
     }
 
-    try {
-      // 获取存储的认证信息
-      const storedToken = await StorageUtil.getAuthToken();
-      console.log('storedToken', JSON.stringify(storedToken));
-      if (!storedToken) {
-        throw new Error('未找到注册信息，请先注册');
-      }
+    const targetAccount = this.accountList.find(
+      acc => acc.username === this.username
+    );
 
-      // 验证账号密码
-      if (this.username !== storedToken.username ||
-        this.password !== storedToken.password) {
-        throw new Error('账号或密码错误');
-      }
-
-      // 验证通过
-      promptAction.showToast({ message: '登录成功' });
-      router.pushUrl({ url: 'pages/detail' });
-
-    } catch (error) {
-      promptAction.showToast({ message: '登录失败: ' + error.message });
+    if (!targetAccount) {
+      promptAction.showToast({ message: '账号未注册' });
+      return;
     }
-  }
 
-  aboutToAppear() {
-    this.checkAutoLogin();
+    if (targetAccount.password !== this.password) { // 实际项目应加密对比
+      promptAction.showToast({ message: '密码错误' });
+      return;
+    }
+
+    // 更新当前账户
+    await StorageUtil.setCurrentAccount(targetAccount.id);
+    promptAction.showToast({ message: '登录成功' });
+    router.replaceUrl({ url: 'pages/detail' });
   }
 
   // 自动登录功能
-  private async checkAutoLogin() {
-    const token = await StorageUtil.getAuthToken();
-    if (token) {
-      this.username = token.username;
-      // 实际项目不应该自动填充密码
-      // this.password = token.password;
-    }
-  }
+  // private async checkAutoLogin() {
+  //   const token = await StorageUtil.getAuthToken();
+  //   if (token) {
+  //     this.username = token.username;
+  //     // 实际项目不应该自动填充密码
+  //     // this.password = token.password;
+  //   }
+  // }
 
   build() {
     Stack({ alignContent: Alignment.Center }) {
       Column() {
+        if (this.showSessionTip) {
+          Text('您的账户信息仍保留在设备上')
+            .fontSize(14)
+            .fontColor('#FFD700')
+            .margin({ bottom: 16 })
+        }
         Column() {
           // 关闭按钮
           Row() {
