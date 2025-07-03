@@ -1,6 +1,7 @@
 {
   "src": [
     "pages/Index",
+    "pages/register",
     "pages/detail",
     "pages/chart",
     "pages/account",

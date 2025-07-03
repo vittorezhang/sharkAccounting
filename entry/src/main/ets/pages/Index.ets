@@ -1,13 +1,103 @@
-import { router } from '@kit.ArkUI';
+import { router, promptAction } from '@kit.ArkUI';
+import { StorageUtil } from '../../../utils/storage';
+import { registerItem } from '../viewModel/commonFunction';
 
 // 登录页面
 @Entry
 @Component
-struct Index {
-  @State phoneNumber: string = '';
+struct IndexPage {
+  @State username: string = '';
   @State password: string = '';
   @State isAgreed: boolean = false;
-  @State showPassword: boolean = false;
+  @State showErrors: boolean = false;
+
+  // 校验规则
+  private validateForm(): boolean {
+    const validations: registerItem = {
+      username: this.username.length >= 4 && /^[a-zA-Z0-9_]+$/.test(this.username),
+      password: this.password.length >= 6,
+      isAgreed: this.isAgreed
+    };
+
+    this.showErrors = Object.values(validations).some((v: registerItem) => !v);
+    return Object.values(validations).every((v: registerItem) => v);
+  }
+
+  // 登录逻辑
+  // private async handleLogin() {
+  //   if (!this.validateForm()) {
+  //     promptAction.showToast({ message: '请完善登录信息' });
+  //     return;
+  //   }
+  //
+  //   // 模拟登录请求
+  //   try {
+  //     // 实际项目中替换为真实API调用
+  //     await this.mockLogin();
+  //     promptAction.showToast({ message: '登录成功' });
+  //     router.pushUrl({
+  //       url: 'pages/detail',
+  //       params: {}
+  //     })
+  //   } catch (error) {
+  //     promptAction.showToast({ message: '登录失败: ' + error.message });
+  //   }
+  // }
+  //
+  // private mockLogin(): Promise<void> {
+  //   return new Promise((resolve, reject) => {
+  //     setTimeout(() => {
+  //       if (Math.random() > 0.2) {
+  //         resolve();
+  //       } else {
+  //         reject(new Error('网络超时'));
+  //       }
+  //     }, 1000);
+  //   });
+  // }
+
+  private async handleLogin() {
+    if (!this.validateForm()) {
+      promptAction.showToast({ message: '请完善登录信息' });
+      return;
+    }
+
+    try {
+      // 获取存储的认证信息
+      const storedToken = await StorageUtil.getAuthToken();
+      console.log('storedToken', JSON.stringify(storedToken));
+      if (!storedToken) {
+        throw new Error('未找到注册信息，请先注册');
+      }
+
+      // 验证账号密码
+      if (this.username !== storedToken.username ||
+        this.password !== storedToken.password) {
+        throw new Error('账号或密码错误');
+      }
+
+      // 验证通过
+      promptAction.showToast({ message: '登录成功' });
+      router.pushUrl({ url: 'pages/detail' });
+
+    } catch (error) {
+      promptAction.showToast({ message: '登录失败: ' + error.message });
+    }
+  }
+
+  aboutToAppear() {
+    this.checkAutoLogin();
+  }
+
+  // 自动登录功能
+  private async checkAutoLogin() {
+    const token = await StorageUtil.getAuthToken();
+    if (token) {
+      this.username = token.username;
+      // 实际项目不应该自动填充密码
+      // this.password = token.password;
+    }
+  }
 
   build() {
     Stack({ alignContent: Alignment.Center }) {
@@ -20,7 +110,11 @@ struct Index {
               .width(24)
               .height(24)
               .onClick(() => {
-
+                console.log('取消登录，跳发现页面');
+                router.pushUrl({
+                  url: 'pages/find',
+                  params: {}
+                })
               })
           }
           .width('100%')
@@ -37,7 +131,7 @@ struct Index {
           .justifyContent(FlexAlign.SpaceBetween)
           .margin({ top: 40, bottom: 10 })
 
-          Text('使用手机号密码登录')
+          Text('使用账号密码登录')
             .fontSize(16)
             .fontColor('#A5AAAF')
             .margin({ top: 30, bottom: 16 })
@@ -48,45 +142,60 @@ struct Index {
 
         // 登录表单区域
         Column() {
-          // 手机号输入框
-          TextInput({ placeholder: '请输入手机号' })
+          // 账号输入框
+          TextInput({ placeholder: '请输入账户名（4-16位字母数字）' })
             .width('90%')
             .height(48)
             .fontSize(16)
-            .type(InputType.Number)
-            .maxLength(11)
+            .maxLength(16)
             .placeholderColor('#999999')
             .caretColor('#FFD700')
             .borderRadius(8)
             .borderWidth(1)
-            .borderColor('#E5E5E5')
+            .borderColor(this.showErrors && !/^[a-zA-Z0-9_]{4,}$/.test(this.username) ? '#FF6B6B' : '#E5E5E5')
             .padding({ left: 16 })
-            .margin({ bottom: 20 })
+            .margin({ bottom: this.showErrors && !/^[a-zA-Z0-9_]{4,}$/.test(this.username) ? 4 : 16 })
             .onChange((value: string) => {
-              this.phoneNumber = value;
+              this.username = value;
             })
 
-          // 密码输入框
-          Row() {
-            TextInput({ placeholder: '请输入密码' })
-              .width('100%')
-              .height(48)
-              .fontSize(16)
-              .type(this.showPassword ? InputType.Normal : InputType.Password)
-              .maxLength(20)
-              .placeholderColor('#999999')
-              .caretColor('#FFD700')
-              .borderRadius(8)
-              .borderWidth(1)
-              .borderColor('#E5E5E5')
-              .onChange((value: string) => {
-                this.password = value;
-              })
+          // 用户名错误提示
+          if (this.showErrors && !/^[a-zA-Z0-9_]{4,}$/.test(this.username)) {
+            Text('账户名需4-16位字母数字')
+              .fontSize(12)
+              .fontColor('#FF6B6B')
+              .width('90%')
+              .textAlign(TextAlign.Start)
+              .margin({ bottom: 16 })
           }
-          .width('100%')
-          .height(48)
-          .padding({ left: 16, right: 16 })
-          .margin({ bottom: 20 })
+
+          // 密码输入
+          TextInput({ placeholder: '请输入密码（至少6位）' })
+            .width('90%')
+            .height(48)
+            .fontSize(16)
+            .type(InputType.Password)
+            .maxLength(20)
+            .placeholderColor('#999999')
+            .caretColor('#FFD700')
+            .borderRadius(8)
+            .borderWidth(1)
+            .borderColor(this.showErrors && this.password.length < 6 ? '#FF6B6B' : '#E5E5E5')
+            .padding({ left: 16 })
+            .margin({ bottom: this.showErrors && this.password.length < 6 ? 4 : 16 })
+            .onChange((value: string) => {
+              this.password = value;
+            })
+
+          // 密码错误提示
+          if (this.showErrors && this.password.length < 6) {
+            Text('密码需至少6位')
+              .fontSize(12)
+              .fontColor('#FF6B6B')
+              .width('90%')
+              .textAlign(TextAlign.Start)
+              .margin({ bottom: 16 })
+          }
 
           // 协议勾选区域
           Row() {
@@ -148,19 +257,15 @@ struct Index {
 
           // 登录按钮
           Button('登录', { type: ButtonType.Normal })
-            .borderRadius(8)
             .width('90%')
             .height(48)
-            .backgroundColor(Boolean(this.phoneNumber) && Boolean(this.password) && this.isAgreed ? '#FFD700' :
-              '#FFE88D')
-            .fontColor('#000000')
-            .fontSize(18)
+            .backgroundColor(this.isAgreed ? '#FFD700' : '#FFE88D')
+            .fontColor(this.isAgreed ? '#FFFFFF' : '#999999')
+            .fontSize(16)
             .fontWeight(FontWeight.Medium)
-            .onClick(() => {
-              // 登录逻辑
-            })
-            .stateEffect(true)
-            .enabled(Boolean(this.phoneNumber) && Boolean(this.password) && this.isAgreed)
+            .borderRadius(8)
+            .onClick(() => this.handleLogin())
+            .enabled(this.isAgreed)
         }
         .width('100%')
         .alignItems(HorizontalAlign.Center)
@@ -186,7 +291,10 @@ struct Index {
               .fontSize(14)
               .fontColor('#999999')
               .onClick(() => {
-                // 注册账号
+                router.pushUrl({
+                  url: 'pages/register',
+                  params: {}
+                })
               })
           }
           .margin({ top: 40, bottom: 60 })
@@ -226,11 +334,7 @@ struct Index {
             }
             .onClick(() => {
               // 微信登录
-              console.log('微信登录')
-              router.pushUrl({
-                url: 'pages/find',
-                params: {}
-              })
+              console.log('微信登录');
             })
             .width('90%')
             .height(48)
