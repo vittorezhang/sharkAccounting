@@ -26,35 +26,6 @@ struct RegisterPage {
   }
 
   // 注册逻辑
-  // private async handleRegister() {
-  //   if (!this.validateForm()) {
-  //     promptAction.showToast({ message: '请完善注册信息' });
-  //     return;
-  //   }
-  //
-  //   // 模拟注册请求
-  //   try {
-  //     // 实际项目中替换为真实API调用
-  //     await this.mockRegister();
-  //     promptAction.showToast({ message: '注册成功' });
-  //     router.back();
-  //   } catch (error) {
-  //     promptAction.showToast({ message: '注册失败: ' + error.message });
-  //   }
-  // }
-  //
-  // private mockRegister(): Promise<void> {
-  //   return new Promise((resolve, reject) => {
-  //     setTimeout(() => {
-  //       if (Math.random() > 0.2) {
-  //         resolve();
-  //       } else {
-  //         reject(new Error('网络超时'));
-  //       }
-  //     }, 1000);
-  //   });
-  // }
-
   private async handleRegister() {
     if (!this.validateForm()) {
       promptAction.showToast({ message: '请完善注册信息' });

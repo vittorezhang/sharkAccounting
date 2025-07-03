@@ -24,38 +24,6 @@ struct IndexPage {
   }
 
   // 登录逻辑
-  // private async handleLogin() {
-  //   if (!this.validateForm()) {
-  //     promptAction.showToast({ message: '请完善登录信息' });
-  //     return;
-  //   }
-  //
-  //   // 模拟登录请求
-  //   try {
-  //     // 实际项目中替换为真实API调用
-  //     await this.mockLogin();
-  //     promptAction.showToast({ message: '登录成功' });
-  //     router.pushUrl({
-  //       url: 'pages/detail',
-  //       params: {}
-  //     })
-  //   } catch (error) {
-  //     promptAction.showToast({ message: '登录失败: ' + error.message });
-  //   }
-  // }
-  //
-  // private mockLogin(): Promise<void> {
-  //   return new Promise((resolve, reject) => {
-  //     setTimeout(() => {
-  //       if (Math.random() > 0.2) {
-  //         resolve();
-  //       } else {
-  //         reject(new Error('网络超时'));
-  //       }
-  //     }, 1000);
-  //   });
-  // }
-
   private async handleLogin() {
     if (!this.validateForm()) {
       promptAction.showToast({ message: '请完善登录信息' });
