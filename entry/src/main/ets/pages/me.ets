@@ -1,12 +1,13 @@
 import TabBar from '../components/TabBar';
 import { promptAction, router } from '@kit.ArkUI';
 import { StorageUtil } from '../../../utils/storage';
-import { actionBarItem, operateAreaItem, statsItem } from '../viewModel/commonFunction';
+import { actionBarItem, AuthToken, operateAreaItem, statsItem } from '../viewModel/commonFunction';
 
 @Entry
 @Component
 struct MePage {
   @State private currentIndex: number = 4;
+  // @State currentAccount: AuthToken | null = null;
   @State isLoggedIn: boolean = true;
   @State private isVip: boolean = false; // VIP状态
   @State private stats: statsItem = {
@@ -40,7 +41,15 @@ struct MePage {
     { name: '去应用市场给鲨鱼记账评分', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
     { name: '关于鲨鱼记账 V5.30.0', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
   ]
-  // 注销账户
+  // aboutToAppear() {
+  //   // 从StorageUtil加载当前账户（完全匹配图片中的数据显示）
+  //   StorageUtil.getCurrentAccount().then(account => {
+  //     console.log('account', JSON.stringify(account))
+  //     this.currentAccount = account;
+  //   });
+  // }
+
+  // 注销账户【单账户】
   // private handleLogOut = async () => {
   //   try {
   //     await StorageUtil.clearAuthToken();
@@ -50,6 +59,23 @@ struct MePage {
   //     promptAction.showToast({ message: '操作失败，请重试' });
   //   }
   // };
+
+  // 注销账户【多账户】
+  // private async handleClearAccount() {
+  //   try {
+  //     const accountId = this.currentAccount?.id;
+  //     if (!accountId) return;
+  //     await StorageUtil.clearAccount(accountId);
+  //     promptAction.showToast({ message: '账户数据已清除' });
+  //     // 返回登录页
+  //     router.replaceUrl({
+  //       url: 'pages/Index',
+  //       params: { cleared: 'true' }
+  //     });
+  //   } catch (error) {
+  //     promptAction.showToast({ message: '清除失败: ' + error.message });
+  //   }
+  // }
 
   private handleLogOut = () => {
     this.isLoggedIn = false; // 仅更改登录状态
@@ -73,6 +99,8 @@ struct MePage {
       // 点击确定
       if (result.index === 1) {
         this.handleLogOut()
+        // 注销账户
+        // this.handleClearAccount();
       }
     });
   }

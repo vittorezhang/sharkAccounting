@@ -120,7 +120,7 @@ export class StorageUtil {
     await pref.flush();
   }
 
-  // 获取账户列表（保持图片中的字段默认值）
+  // 获取账户列表
   static async getAccountList(): Promise<AccountList> {
     const pref = await StorageUtil.getPreferences();
     const value = await pref.get(StorageUtil.ACCOUNT_LIST_KEY, '');
@@ -171,9 +171,35 @@ export class StorageUtil {
     await StorageUtil.saveAccountList(accountList);
   }
 
-  // 获取当前账户（对应图片中显示的信息）
+  // 获取当前账户
   static async getCurrentAccount(): Promise<AuthToken | null> {
     const accountList = await StorageUtil.getAccountList();
     return accountList.accounts.find(a => a.id === accountList.currentAccountId) || null;
+  }
+
+  // 注销账户
+  static async clearAccount(accountId: string): Promise<void> {
+    try {
+      const pref = await StorageUtil.getPreferences();
+      const accountList = await StorageUtil.getAccountList();
+
+      // 类型安全过滤
+      const updatedAccounts = accountList.accounts.filter((acc: AuthToken) => acc.id !== accountId);
+
+      // 处理当前账户
+      const updatedCurrentId = accountList.currentAccountId === accountId ? '' : accountList.currentAccountId;
+
+      // 类型安全的保存数据
+      const updatedList: AccountList = {
+        currentAccountId: updatedCurrentId,
+        accounts: updatedAccounts
+      };
+
+      await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(updatedList));
+      await pref.flush();
+    } catch (error) {
+      console.error('清除账户失败:', error);
+      throw new Error('清除账户操作失败');
+    }
   }
 }
