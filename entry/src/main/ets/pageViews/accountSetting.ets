@@ -73,7 +73,7 @@ struct AccountSettingsPage {
   }
 
   aboutToAppear() {
-    // 从StorageUtil加载当前账户（完全匹配图片中的数据显示）
+    // 从StorageUtil加载当前账户
     StorageUtil.getCurrentAccount().then(account => {
       console.log('账户设置页的account', JSON.stringify(account))
       this.currentAccount = account;
@@ -81,86 +81,93 @@ struct AccountSettingsPage {
   }
 
   build() {
-    Column() {
-      // 1. 顶部标题栏
-      Row() {
-        Image($r('app.media.ic_arrow_back'))
-          .width(24)
-          .height(24)
-          .onClick(() => router.back())
+    Stack() {
+      Scroll() {
+        Column() {
+          // 1. 顶部标题栏
+          Row() {
+            Image($r('app.media.ic_arrow_back'))
+              .width(24)
+              .height(24)
+              .onClick(() => router.back())
 
-        Text('账号设置')
-          .fontSize(18)
-          .fontWeight(FontWeight.Bold)
-          .layoutWeight(1)
-          .textAlign(TextAlign.Center)
-          .fontColor('#333333')
-      }
-      .width('100%')
-      .height(56)
-      .padding({ left: 16, right: 16 })
-      .backgroundColor('#FFD700')
-
-      if (this.currentAccount) {
-        // 2. 主体内容
-        Scroll() {
-          Column() {
-            // 头像设置
-            Row() {
-              Text('头像')
-                .fontSize(16)
-                .fontColor('#333333')
-                .layoutWeight(1)
-
-              Image($r('app.media.avatar'))
-                .width(48)
-                .height(48)
-                .borderRadius(24)
-                .border({ width: 1, color: '#F0F0F0' })
-
-              Image($r('app.media.ic_arrow_right'))
-                .width(16)
-                .height(16)
-            }
-            .width('100%')
-            .height(72)
-            .padding({ left: 16, right: 16 })
-            .backgroundColor('#FFFFFF')
-            .onClick(() => {
-              promptAction.showToast({ message: '头像功能待开发' });
-            })
-
-            Divider()
-              .strokeWidth(0.5)
-              .color('#F5F5F5')
-
-            // 信息列表
-            this.buildInfoItem('ID', this.currentAccount?.id, false, true)
-            this.buildInfoItem('昵称', this.currentAccount?.username, true, true)
-            this.buildInfoItem('性别', this.currentAccount?.gender, true, true)
-            this.buildInfoItem('手机号', this.currentAccount?.phone, true, false)
-            this.buildInfoItem('微信', this.currentAccount?.wechat, true, false)
-            this.buildInfoItem('应急联系方式', this.currentAccount?.emergencyContact, true)
-
-            // 功能入口
-            this.buildFunctionItem('个人信息浏览及导出', false)
-            this.buildFunctionItem('申请注销账号', true, '注销后账号无法找回')
+            Text('账号设置')
+              .fontSize(18)
+              .fontWeight(FontWeight.Bold)
+              .layoutWeight(1)
+              .textAlign(TextAlign.Center)
+              .fontColor('#333333')
           }
           .width('100%')
+          .height(56)
+          .padding({ left: 16, right: 16 })
+          .backgroundColor('#FFD700')
+
+          if (this.currentAccount) {
+            // 2. 主体内容
+            Scroll() {
+              Column() {
+                // 头像设置
+                Row() {
+                  Text('头像')
+                    .fontSize(16)
+                    .fontColor('#333333')
+                    .layoutWeight(1)
+
+                  Image($r('app.media.avatar'))
+                    .width(48)
+                    .height(48)
+                    .borderRadius(24)
+                    .border({ width: 1, color: '#F0F0F0' })
+
+                  Image($r('app.media.ic_arrow_right'))
+                    .width(16)
+                    .height(16)
+                }
+                .width('100%')
+                .height(72)
+                .padding({ left: 16, right: 16 })
+                .backgroundColor('#FFFFFF')
+                .onClick(() => {
+                  promptAction.showToast({ message: '头像功能待开发' });
+                })
+
+                Divider()
+                  .strokeWidth(0.5)
+                  .color('#F5F5F5')
+
+                // 信息列表
+                this.buildInfoItem('ID', this.currentAccount?.id, false, true)
+                this.buildInfoItem('昵称', this.currentAccount?.username, true, true)
+                this.buildInfoItem('性别', this.currentAccount?.gender, true, true)
+                this.buildInfoItem('手机号', this.currentAccount?.phone, true, false)
+                this.buildInfoItem('微信', this.currentAccount?.wechat, true, false)
+                this.buildInfoItem('应急联系方式', this.currentAccount?.emergencyContact, true)
+
+                // 功能入口
+                this.buildFunctionItem('个人信息浏览及导出', false)
+                this.buildFunctionItem('申请注销账号', true, '注销后账号无法找回')
+              }
+              .width('100%')
+            }
+            .layoutWeight(1)
+            .backgroundColor('#F5F5F5')
+          }
+
+          // 3. 退出登录按钮
+          Button('退出登录', { type: ButtonType.Normal })
+            .width('100%')
+            .height(48)
+            .margin({ top: 12, bottom: 48 })
+            .fontSize(16)
+            .fontColor('#FF6B6B')
+            .backgroundColor('#FFFFFF')
+            .onClick(() => this.showLogoutConfirm())
         }
-        .layoutWeight(1)
+        .width('100%')
+        .height('100%')
         .backgroundColor('#F5F5F5')
       }
-
-      // 3. 退出登录按钮
-      Button('退出登录', { type: ButtonType.Normal })
-        .width('90%')
-        .height(48)
-        .margin({ bottom: 24 })
-        .fontSize(16)
-        .fontColor('#FF6B6B')
-        .backgroundColor('#FFFFFF')
-        .onClick(() => this.showLogoutConfirm())
     }
     .width('100%')
     .height('100%')
@@ -182,7 +189,7 @@ struct AccountSettingsPage {
         Row() {
           Text(value)
             .fontSize(16)
-            .fontColor(value?.includes('未') ? '#999999' : '#333333')
+            .fontColor('#999999')
             .margin({ right: 8 })
 
           if (!isSet) {
@@ -202,6 +209,7 @@ struct AccountSettingsPage {
       .width('100%')
       .padding({ left: 16, right: 16 })
       .backgroundColor('#FFFFFF')
+      .margin({ top: label == '手机号' ? 12 : 0 })
 
       Divider()
         .strokeWidth(0.5)
@@ -236,6 +244,7 @@ struct AccountSettingsPage {
       .width('100%')
       .padding({ left: 16, right: 16 })
       .backgroundColor('#FFFFFF')
+      .margin({ top: label == '个人信息浏览及导出' ? 12 : 0 })
 
       if (!withWarning) {
         Divider()
