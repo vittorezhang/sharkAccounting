@@ -45,7 +45,7 @@ export default struct TabBar {
         this.timerId = setTimeout(() => {
           router.replaceUrl({
             url: 'pages/Index',
-            params: { keepSession: true }
+            params: { keepSession: false }
           });
         }, 1500);
         return; // 终止后续逻辑
