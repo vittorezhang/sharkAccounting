@@ -8,7 +8,6 @@ import { actionBarItem, AuthToken, operateAreaItem, statsItem } from '../viewMod
 struct MePage {
   @State private currentIndex: number = 4;
   @State currentAccount: AuthToken | null = null;
-  @State isLoggedIn: boolean = true;
   @State private isVip: boolean = false; // VIP状态
   @State private stats: statsItem = {
     consecutiveDays: 2,
@@ -45,64 +44,8 @@ struct MePage {
   aboutToAppear() {
     // 从StorageUtil加载当前账户（完全匹配图片中的数据显示）
     StorageUtil.getCurrentAccount().then(account => {
-      console.log('account', JSON.stringify(account))
+      console.log('页面我的account', JSON.stringify(account))
       this.currentAccount = account;
-    });
-  }
-
-  // 注销账户【单账户】
-  // private handleLogOut = async () => {
-  //   try {
-  //     await StorageUtil.clearAuthToken();
-  //     promptAction.showToast({ message: '退出成功' });
-  //     router.replaceUrl({ url: 'pages/Index' });
-  //   } catch (error) {
-  //     promptAction.showToast({ message: '操作失败，请重试' });
-  //   }
-  // };
-
-  // 注销账户【多账户】
-  // private async handleClearAccount() {
-  //   try {
-  //     const accountId = this.currentAccount?.id;
-  //     if (!accountId) return;
-  //     await StorageUtil.clearAccount(accountId);
-  //     promptAction.showToast({ message: '账户数据已清除' });
-  //     // 返回登录页
-  //     router.replaceUrl({
-  //       url: 'pages/Index',
-  //       params: { cleared: 'true' }
-  //     });
-  //   } catch (error) {
-  //     promptAction.showToast({ message: '清除失败: ' + error.message });
-  //   }
-  // }
-
-  private handleLogOut = () => {
-    this.isLoggedIn = false; // 仅更改登录状态
-    promptAction.showToast({ message: '已退出当前登录' });
-    router.replaceUrl({
-      url: 'pages/Index',
-      params: { keepSession: true } // 传递保持会话参数
-    });
-  };
-
-  // 退出确认弹窗
-  private showLogoutConfirm() {
-    promptAction.showDialog({
-      title: '退出登录',
-      message: '确认退出当前登录?',
-      buttons: [
-        { text: '取消', color: '#999999' },
-        { text: '确认退出', color: '#FF6B6B' }
-      ]
-    }).then(result => {
-      // 点击确定
-      if (result.index === 1) {
-        this.handleLogOut()
-        // 注销账户
-        // this.handleClearAccount();
-      }
     });
   }
 
@@ -120,7 +63,7 @@ struct MePage {
           Row() {
             Text('我的')
               .fontSize(20)
-              .fontColor('#FFFFFF')
+              .fontColor('#333333')
               .layoutWeight(1)
               .textAlign(TextAlign.Center)
           }
@@ -143,6 +86,12 @@ struct MePage {
                       .fontColor('#333333')
                       .margin({ right: 12 })
                   }
+                  .onClick(() => {
+                    router.pushUrl({
+                      url: 'pageViews/accountSetting',
+                      params: {}
+                    })
+                  })
 
                   Button(this.isVip ? 'VIP会员' : '已打卡')
                     .fontSize(12)
@@ -373,23 +322,6 @@ struct MePage {
             .width('100%')
           }
           .layoutWeight(1)
-
-          // 退出登录按钮
-          Button('退出登录', { type: ButtonType.Normal })
-            .width('90%')
-            .height(48)
-            .fontSize(16)
-            .backgroundColor('#FFFFFF')
-            .fontColor('#FF6B6B')
-            .border({
-              width: 1,
-              color: '#FF6B6B',
-              radius: 8
-            })
-            .margin({ bottom: 24 })
-            .onClick(() => {
-              this.showLogoutConfirm()
-            })
 
           // 3. 底部TabBar
           TabBar({ currentIndex: $currentIndex })
