@@ -71,7 +71,19 @@ struct IndexPage {
     );
 
     if (!targetAccount) {
-      promptAction.showToast({ message: '账号未注册' });
+      promptAction.showDialog({
+        title: '账号未注册',
+        message: '是否前往注册?',
+        buttons: [
+          { text: '取消', color: '#999999' },
+          { text: '确认', color: '#FF6B6B' }
+        ]
+      }).then(result => {
+        // 点击确定
+        if (result.index === 1) {
+          router.pushUrl({ url: 'pages/register' });
+        }
+      });
       return;
     }
 
