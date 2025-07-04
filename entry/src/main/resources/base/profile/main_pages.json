@@ -6,7 +6,8 @@
     "pages/chart",
     "pages/account",
     "pages/find",
-    "pages/me"
+    "pages/me",
+    "pageViews/accountSetting"
   ]
 }
 
