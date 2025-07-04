@@ -29,7 +29,7 @@ struct FindPage {
             .width('100%')
             .height(56)
             .fontSize(20)
-            .fontColor('#FFFFFF')
+            .fontColor('#333333')
             .textAlign(TextAlign.Center)
             .backgroundColor('#FFD700')
 
