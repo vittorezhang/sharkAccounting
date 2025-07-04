@@ -34,21 +34,24 @@ struct RegisterPage {
 
     try {
       // 生成唯一ID（实际项目应使用更安全的生成方式）
-      const accountId = 'user_' + Date.now();
-      // 构建账户数据（包含图片中所有字段）
+      const accountId = `user_${Date.now()}`;
+      // 构建账户数据
       const newAccount: AuthToken = {
         id: accountId,
         username: this.username,
-        password: this.password, // 实际项目应该加密存储
+        password: this.password,
+        token: StorageUtil.generateToken(accountId),
+        tokenExpire: Date.now() + 1 * 60 * 1000,
         timestamp: Date.now()
       };
+      console.log('newAccount', JSON.stringify(newAccount))
       // 存储新账户
       await StorageUtil.setAccount(newAccount);
       // 自动设为当前账户
       await StorageUtil.setCurrentAccount(accountId);
 
       promptAction.showToast({ message: '注册成功' });
-      router.back();
+      router.replaceUrl({ url: 'pages/Index' });
     } catch (error) {
       promptAction.showToast({ message: '注册失败: ' + error.message });
     }

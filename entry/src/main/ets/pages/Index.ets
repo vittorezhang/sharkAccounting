@@ -26,6 +26,7 @@ struct IndexPage {
   }
 
   async aboutToAppear() {
+    console.log('执行了吗')
     const params = router.getParams() as Record<string, string> | undefined;
     if (params?.keepSession) {
       // 显示保持会话的UI提示
@@ -80,7 +81,22 @@ struct IndexPage {
       return;
     }
 
-    // 更新当前账户
+    //  生成新Token（有效期1分钟）
+    const newToken = StorageUtil.generateToken(targetAccount.id);
+    const tokenExpire = Date.now() + 1 * 60 * 1000;
+
+    // 更新账户Token（严格类型）
+    const updatedAccount: AuthToken = {
+      id: targetAccount.id,
+      username: targetAccount.username,
+      password: targetAccount.password,
+      timestamp: Date.now(),
+      token: newToken,
+      tokenExpire: tokenExpire
+    };
+
+    // 存储并设为当前账户
+    await StorageUtil.setAccount(updatedAccount);
     await StorageUtil.setCurrentAccount(targetAccount.id);
     promptAction.showToast({ message: '登录成功' });
     router.replaceUrl({ url: 'pages/detail' });
