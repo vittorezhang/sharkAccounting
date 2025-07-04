@@ -7,7 +7,7 @@ import { actionBarItem, AuthToken, operateAreaItem, statsItem } from '../viewMod
 @Component
 struct MePage {
   @State private currentIndex: number = 4;
-  // @State currentAccount: AuthToken | null = null;
+  @State currentAccount: AuthToken | null = null;
   @State isLoggedIn: boolean = true;
   @State private isVip: boolean = false; // VIP状态
   @State private stats: statsItem = {
@@ -41,13 +41,14 @@ struct MePage {
     { name: '去应用市场给鲨鱼记账评分', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
     { name: '关于鲨鱼记账 V5.30.0', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
   ]
-  // aboutToAppear() {
-  //   // 从StorageUtil加载当前账户（完全匹配图片中的数据显示）
-  //   StorageUtil.getCurrentAccount().then(account => {
-  //     console.log('account', JSON.stringify(account))
-  //     this.currentAccount = account;
-  //   });
-  // }
+
+  aboutToAppear() {
+    // 从StorageUtil加载当前账户（完全匹配图片中的数据显示）
+    StorageUtil.getCurrentAccount().then(account => {
+      console.log('account', JSON.stringify(account))
+      this.currentAccount = account;
+    });
+  }
 
   // 注销账户【单账户】
   // private handleLogOut = async () => {
@@ -137,7 +138,7 @@ struct MePage {
                     Image($r('app.media.avatar'))
                       .width(50)
                       .height(50).borderRadius(25)
-                    Text('who am I')
+                    Text(this.currentAccount?.username)
                       .fontSize(24)
                       .fontColor('#333333')
                       .margin({ right: 12 })
@@ -385,7 +386,7 @@ struct MePage {
               color: '#FF6B6B',
               radius: 8
             })
-            .margin({ bottom: 24 })// .onClick(this.handleLogOut)
+            .margin({ bottom: 24 })
             .onClick(() => {
               this.showLogoutConfirm()
             })
