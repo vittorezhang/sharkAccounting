@@ -42,6 +42,7 @@ export interface AuthToken {
   password: string;
   token?: string; // 新增JWT token
   tokenExpire?: number; // 过期时间戳（单位：毫秒）
+  avatar?: string;
   nickname?: string;
   gender?: string;
   phone?: string;

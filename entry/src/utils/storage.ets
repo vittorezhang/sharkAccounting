@@ -13,7 +13,7 @@ export class StorageUtil {
   private static readonly ACCOUNT_LIST_KEY = 'account_list';
 
   // -------------------添加token 时效start------------------
-  private static readonly TOKEN_EXPIRE_MS = 1 * 60 * 1000; // 1分钟
+  private static readonly TOKEN_EXPIRE_MS = 120 * 60 * 1000; // 120分钟
 
   private static readonly REFRESH_THRESHOLD = 5 * 60 * 1000; // 提前5分钟刷新
 
@@ -194,6 +194,7 @@ export class StorageUtil {
           id: account.id,
           username: account.username,
           password: account.password,
+          gender: account.gender,
           token: account.token,
           tokenExpire: account.tokenExpire,
           timestamp: account.timestamp

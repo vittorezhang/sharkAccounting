@@ -26,7 +26,6 @@ struct IndexPage {
   }
 
   async aboutToAppear() {
-    console.log('执行了吗')
     const params = router.getParams() as Record<string, string> | undefined;
     if (params?.keepSession) {
       // 显示保持会话的UI提示
@@ -53,7 +52,7 @@ struct IndexPage {
   private async loadAccounts() {
     try {
       const result = await StorageUtil.getAccountList();
-      console.log('accounts', JSON.stringify(result))
+      console.log('登录页获取到的accounts', JSON.stringify(result))
       this.accountList = result.accounts;
     } catch (error) {
       console.error('加载账户列表失败:', error);
@@ -83,18 +82,20 @@ struct IndexPage {
 
     //  生成新Token（有效期1分钟）
     const newToken = StorageUtil.generateToken(targetAccount.id);
-    const tokenExpire = Date.now() + 1 * 60 * 1000;
+    const tokenExpire = Date.now() + 120 * 60 * 1000;
 
     // 更新账户Token（严格类型）
     const updatedAccount: AuthToken = {
       id: targetAccount.id,
       username: targetAccount.username,
       password: targetAccount.password,
+      gender: '男',
       timestamp: Date.now(),
       token: newToken,
       tokenExpire: tokenExpire
     };
 
+    console.log('updatedAccount', JSON.stringify(updatedAccount))
     // 存储并设为当前账户
     await StorageUtil.setAccount(updatedAccount);
     await StorageUtil.setCurrentAccount(targetAccount.id);

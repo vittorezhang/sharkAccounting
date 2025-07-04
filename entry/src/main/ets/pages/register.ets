@@ -40,8 +40,9 @@ struct RegisterPage {
         id: accountId,
         username: this.username,
         password: this.password,
+        gender: '男',
         token: StorageUtil.generateToken(accountId),
-        tokenExpire: Date.now() + 1 * 60 * 1000,
+        tokenExpire: Date.now() + 120 * 60 * 1000,
         timestamp: Date.now()
       };
       console.log('newAccount', JSON.stringify(newAccount))

@@ -51,7 +51,7 @@ export class AuthInterceptor {
         username: account.username,
         password: account.password,
         token: newToken,
-        tokenExpire: Date.now() + 1 * 60 * 1000,
+        tokenExpire: Date.now() + 120 * 60 * 1000,
         timestamp: account.timestamp
       };
 
