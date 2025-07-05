@@ -2,10 +2,24 @@ import { StorageUtil } from "./storage";
 import { router } from "@kit.ArkUI";
 import { BusinessError } from '@ohos.base';
 import { AuthToken } from "../main/ets/viewModel/commonFunction";
+import { PUBLIC_ROUTES } from '../main/ets/common/routes/index';
 
 export class AuthInterceptor {
   private static isRefreshing = false;
   private static refreshQueue: ((token: string | null) => void)[] = [];
+
+  static shouldCheckToken(url: string): boolean {
+    return !PUBLIC_ROUTES.some(route => url.includes(route));
+  }
+
+  static async checkRouteAccess(url: string): Promise<boolean> {
+    if (!AuthInterceptor.shouldCheckToken(url)) {
+      return true;
+    }
+
+    return await AuthInterceptor.checkWithRefresh();
+  }
+
 
   static async checkWithRefresh(): Promise<boolean> {
     const account = await StorageUtil.getCurrentAccount();

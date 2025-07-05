@@ -1,6 +1,7 @@
 import { TabItem } from '../viewModel/TabBarListModel';
 import { promptAction, router } from '@kit.ArkUI';
 import { AuthInterceptor } from '../../../utils/AuthInterceptor';
+import { TAB_ROUTES } from '../common/routes';
 
 @Component
 export default struct TabBar {
@@ -20,41 +21,38 @@ export default struct TabBar {
   ]
 
   private getTabRoute(index: number): string {
-    const routes = ['pages/detail', 'pages/chart', 'pages/account', 'pages/find', 'pages/me']
-    return routes[index] || 'pages/find'
+    return TAB_ROUTES[index] || 'pages/find';
   }
 
-  // 监听Tab切换
   onIndexChange() {
     console.log('监听Tab切换', this.currentIndex);
+    const targetRoute = this.getTabRoute(this.currentIndex);
     // 先清除已有定时器（防止重复）
     if (this.timerId) {
       clearTimeout(this.timerId);
       this.timerId = 0;
     }
 
-    AuthInterceptor.checkWithRefresh().then(valid => {
-      if (!valid) {
+    AuthInterceptor.checkRouteAccess(targetRoute).then(valid => {
+      if (valid === false && AuthInterceptor.shouldCheckToken(targetRoute)) {
         console.log('token已失效，请重新登录');
         promptAction.showToast({
           message: 'token已失效，请重新登录',
           duration: 1500,
         });
-
         // 设置新定时器
         this.timerId = setTimeout(() => {
           router.replaceUrl({
             url: 'pages/Index',
-            params: { keepSession: false }
+            params: { sessionExpired: false }
           });
         }, 1500);
-        return; // 终止后续逻辑
+        // 终止后续逻辑
+        return;
       }
-
-      // Token有效时正常切换
-      router.replaceUrl({
-        url: this.getTabRoute(this.currentIndex)
-      });
+      console.log('允许访问的情况：1. Token有效 或 2. 路由在白名单中')
+      // 允许访问的情况：1. Token有效 或 2. 路由在白名单中
+      router.replaceUrl({ url: targetRoute });
     });
   }
 
