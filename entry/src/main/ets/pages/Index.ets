@@ -142,9 +142,9 @@ struct IndexPage {
               .width(24)
               .height(24)
               .onClick(() => {
-                console.log('取消登录，跳发现页面');
+                console.log('取消登录，跳注册页面');
                 router.pushUrl({
-                  url: 'pages/find',
+                  url: 'pages/register',
                   params: {}
                 })
               })
