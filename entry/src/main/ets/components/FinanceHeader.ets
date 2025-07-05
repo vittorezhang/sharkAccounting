@@ -1,4 +1,5 @@
 import { actionBarItem } from "../viewModel/commonFunction";
+import { promptAction, router } from "@kit.ArkUI";
 
 @Component
 export default struct FinanceHeader {
@@ -105,7 +106,7 @@ export default struct FinanceHeader {
         // 功能图标区
         Flex({ justifyContent: FlexAlign.SpaceAround }) {
           Row() {
-            ForEach(this.actionBarList, (item: actionBarItem) => {
+            ForEach(this.actionBarList, (item: actionBarItem, index) => {
               Column() {
                 Image($r(item.icon))
                   .width(24)
@@ -115,6 +116,13 @@ export default struct FinanceHeader {
                   .fontColor('#999999')
                   .margin({ top: 8 })
               }
+              .onClick(async () => {
+                if (index == 0) {
+                  // 跳转账单页面
+                  return router.pushUrl({ url: 'pageViews/sharkBillPage' });
+                }
+                promptAction.showToast({ message: `${item.name}待开发` })
+              })
               .width('20%')
             })
           }
