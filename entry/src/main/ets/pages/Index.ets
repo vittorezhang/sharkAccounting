@@ -36,7 +36,12 @@ struct IndexPage {
   }
 
   async onPageShow() {
-    await this.loadAccounts();
+    const account = await StorageUtil.getCurrentAccount();
+    if (!account?.token || !(await StorageUtil.verifyToken(account.token))) {
+      await this.loadAccounts();
+      return;
+    }
+    router.pushUrl({ url: 'pages/detail' });
   }
 
   async onPageHide() {
