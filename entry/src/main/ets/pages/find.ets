@@ -5,7 +5,7 @@ import { budgetRowItem, iconItem } from '../viewModel/commonFunction'
 @Entry
 @Component
 struct FindPage {
-  @State private currentIndex: number = 3 // 默认显示发现页
+  @State private currentIndex: number = 3
   @State progress: number = 1.0 // 进度值(0-1)
   private budgetRowList: budgetRowItem[] = [
     { label: '剩余预算：', value: '999.00' },

@@ -41,7 +41,7 @@ struct IndexPage {
       await this.loadAccounts();
       return;
     }
-    router.pushUrl({ url: 'pages/detail' });
+    router.replaceUrl({ url: 'pages/detail' });
   }
 
   async onPageHide() {

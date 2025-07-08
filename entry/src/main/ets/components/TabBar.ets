@@ -5,7 +5,7 @@ import { TAB_ROUTES } from '../common/routes';
 
 @Component
 export default struct TabBar {
-  @Link @Watch('onIndexChange') currentIndex: number // 默认选中"发现"页
+  @Link @Watch('onIndexChange') currentIndex: number
   @State timerId: number = 0;
   private tabItems: TabItem[] = [
     { name: '明细', icon: 'app.media.bottom_detail_stroke', activeIcon: 'app.media.bottom_detail_fill' },
@@ -21,7 +21,7 @@ export default struct TabBar {
   ]
 
   private getTabRoute(index: number): string {
-    return TAB_ROUTES[index] || 'pages/find';
+    return TAB_ROUTES[index] || 'pages/detail';
   }
 
   onIndexChange() {
