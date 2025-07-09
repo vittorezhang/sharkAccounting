@@ -6,11 +6,22 @@ import { AuthToken, registerItem } from '../viewModel/commonFunction';
 @Entry
 @Component
 struct RegisterPage {
+  @State accountList: AuthToken[] = []; // 明确定义类型
   @State username: string = '';
   @State password: string = '';
   @State confirmPassword: string = '';
   @State isAgreed: boolean = false;
   @State showErrors: boolean = false;
+
+  async onPageShow() {
+    try {
+      const result = await StorageUtil.getAccountList();
+      console.log('注册页获取到的accounts', JSON.stringify(result))
+      this.accountList = result.accounts;
+    } catch (error) {
+      console.error('加载账户列表失败:', error);
+    }
+  }
 
   // 校验规则
   private validateForm(): boolean {
@@ -29,6 +40,14 @@ struct RegisterPage {
   private async handleRegister() {
     if (!this.validateForm()) {
       promptAction.showToast({ message: '请完善注册信息' });
+      return;
+    }
+    const targetAccount = this.accountList.find(
+      acc => acc.username === this.username
+    );
+
+    if (targetAccount?.username === this.username) {
+      promptAction.showToast({ message: '该账号已注册,请前往登录' });
       return;
     }
 

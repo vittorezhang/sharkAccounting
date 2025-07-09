@@ -31,7 +31,6 @@ struct IndexPage {
       // 显示保持会话的UI提示
       this.showSessionTip = true;
     }
-    await this.loadAccounts();
     this.setupDataListener(); // 初始化监听
   }
 
