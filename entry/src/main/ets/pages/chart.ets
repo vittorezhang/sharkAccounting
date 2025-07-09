@@ -5,6 +5,14 @@ import TabBar from '../components/TabBar'
 struct ChartPage {
   @State private currentIndex: number = 1
 
+  onPageShow() {
+    // 存储数据
+    AppStorage.set('tempRouteData', {
+      currentRoutePath: 'pages/chart',
+      currentIndex: this.currentIndex
+    });
+  }
+
   build() {
     Column() {
       // 1. 顶部黄色标题栏

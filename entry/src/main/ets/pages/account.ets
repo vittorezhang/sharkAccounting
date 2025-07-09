@@ -1,9 +1,14 @@
 import { router } from '@kit.ArkUI'
 import TabBar from '../components/TabBar'
+import { RouteData } from '../viewModel/commonFunction';
 
 @Entry
 @Component
 struct AccountPage {
+  @StorageLink('tempRouteData') tempRouteData: RouteData = {
+    currentRoutePath: '',
+    currentIndex: 2
+  };
   @State private currentIndex: number = 2
   @State translateY: number = 1000 // 初始在屏幕外
   @State selectedTab: string = '支出'
@@ -138,8 +143,7 @@ struct AccountPage {
     }, () => {
       this.translateY = 1000
     })
-    // router.back()
-    router.replaceUrl({ url: 'pages/detail' });
+    router.replaceUrl({ url: this.tempRouteData?.currentRoutePath });
   }
 
   private switchTab(tab: string) {

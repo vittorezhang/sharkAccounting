@@ -55,3 +55,8 @@ export interface AccountList {
   currentAccountId: string;
   accounts: AuthToken[];
 }
+
+export interface RouteData {
+  currentRoutePath: string,
+  currentIndex: number
+}

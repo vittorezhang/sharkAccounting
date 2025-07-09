@@ -20,6 +20,14 @@ struct FindPage {
     { name: '汇率计算器', icon: 'app.media.exchange_icon' },
   ]
 
+  onPageShow() {
+    // 存储数据
+    AppStorage.set('tempRouteData', {
+      currentRoutePath: 'pages/find',
+      currentIndex: this.currentIndex
+    });
+  }
+
   build() {
     Stack() {
       Scroll() {

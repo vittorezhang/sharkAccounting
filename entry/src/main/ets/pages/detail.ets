@@ -30,6 +30,14 @@ struct DetailPage {
     }
   ];
 
+  onPageShow() {
+    // 存储数据
+    AppStorage.set('tempRouteData', {
+      currentRoutePath: 'pages/detail',
+      currentIndex: this.currentIndex
+    });
+  }
+
   build() {
     Column() {
       // 1. 顶部标题栏

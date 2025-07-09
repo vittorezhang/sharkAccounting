@@ -49,6 +49,14 @@ struct MePage {
     });
   }
 
+  onPageShow() {
+    // 存储数据
+    AppStorage.set('tempRouteData', {
+      currentRoutePath: 'pages/me',
+      currentIndex: this.currentIndex
+    });
+  }
+
   // 升级VIP
   private handleUpgrade = () => {
     promptAction.showToast({ message: '跳转VIP购买页' });
