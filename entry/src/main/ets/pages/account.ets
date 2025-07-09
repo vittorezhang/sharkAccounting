@@ -1,5 +1,5 @@
 import font from '@ohos.font';
-import { router } from '@kit.ArkUI'
+import { promptAction, router } from '@kit.ArkUI'
 import { MemoryCache } from '../../../utils/MemoryCache';
 import TabBar from '../components/TabBar'
 
@@ -15,6 +15,18 @@ interface GeneratedTypeLiteralInterface_1 {
   direction: 'left' | 'right';
 }
 
+export interface textItem {
+  label: string;
+  icon: string;
+  isBlank?: boolean;
+  isConfirm?: boolean;
+}
+
+interface GeneratedTypeLiteralInterface_2 {
+  firstOperand: string;
+  operator: '+' | '-' | '×' | '';
+}
+
 @Entry
 @Component
 struct AccountPage {
@@ -28,6 +40,41 @@ struct AccountPage {
   @State translateY: number = 1000 // 初始在屏幕外
   @State selectedTab: string = '支出'
   @State selectedCategory: string = ''
+  @State amount: string = '0.00'
+  @State showKeyboard: boolean = false
+  @State note: string = ''
+  @State calculation: GeneratedTypeLiteralInterface_2 = {
+    firstOperand: '',
+    operator: ''
+  }
+  private oneRowList: textItem[] = [
+    { label: '7', icon: '' },
+    { label: '8', icon: '' },
+    { label: '9', icon: '' },
+    { label: '今天', icon: '' },
+  ];
+  private twoRowList: textItem[] = [
+    { label: '4', icon: '' },
+    { label: '5', icon: '' },
+    { label: '6', icon: '' },
+    { label: '+', icon: '' },
+  ];
+  private threeRowList: textItem[] = [
+    { label: '1', icon: '' },
+    { label: '2', icon: '' },
+    { label: '3', icon: '' },
+    { label: '-', icon: '' },
+  ];
+  private fourRowList: textItem[] = [
+    { label: '.', icon: '' },
+    { label: '0', icon: '' },
+    { label: 'x', icon: '' },
+    {
+      label: this.calculation.operator ? '=' : '完成',
+      icon: '',
+      isConfirm: true
+    }
+  ];
   // 支出的分类数据
   @State expensesCategories: Category[] = [
     { name: '餐饮', icon: '\ue8a4' },
@@ -179,6 +226,262 @@ struct AccountPage {
     .alignItems(HorizontalAlign.Center)
   }
 
+  @Builder
+  buildTopBar() {
+    Column() {
+      Row() {
+        Text('取消')
+          .fontSize(16)
+          .fontColor('#666666')
+          .onClick(() => router.back())
+
+        Blank()
+
+        Row() {
+          Text('支出')
+            .fontSize(18)
+            .fontColor('#333333')
+            .fontWeight(FontWeight.Bold)
+            .margin({ right: 24 })
+
+          Text('收入')
+            .fontSize(18)
+            .fontColor('#999999')
+        }
+      }
+      .padding(16)
+    }
+    .backgroundColor('#FFD700')
+    .width('100%')
+  }
+
+  @Builder
+  buildNumberKeyboard() {
+    Column() {
+      // 在金额显示区上方添加计算表达式
+      Text(
+        this.calculation.firstOperand ?
+          `${this.calculation.firstOperand} ${this.calculation.operator}` :
+          ''
+      )
+        .fontSize(16)
+        .fontColor('#999999')
+        .margin({ bottom: 4 })
+        .width('100%')
+        .textAlign(TextAlign.End)
+
+      // 金额显示区
+      Flex({ direction: FlexDirection.Column }) {
+        Row() {
+          Text(this.amount)
+            .fontSize(32)
+            .fontColor('#333333')
+            .onClick(() => this.showKeyboard = true)
+        }
+        .padding({ right: 16 })
+        .width('100%')
+        .height(62)
+        .justifyContent(FlexAlign.End)
+
+        Row() {
+          Text('备注:')
+            .fontSize(14)
+            .fontColor('#333333')
+          TextInput({ placeholder: ` ${this.note ? this.note : '点击填写备注'}` })
+            .backgroundColor('#F5F5F5')
+            .onChange((value: string) => {
+              this.note = value;
+            })
+
+        }
+        .width('100%')
+        .height(56)
+        .padding({ left: 16 })
+        .backgroundColor('#F5F5F5')
+      }
+      .width('100%')
+      .height(82)
+      .backgroundColor('#FFFFFF')
+
+      // 第一行
+      Row() {
+        ForEach(this.oneRowList, (item: textItem) => {
+          this.buildKeyButton(item?.label)
+        })
+      }
+
+      // 第二行
+      Row() {
+        ForEach(this.twoRowList, (item: textItem) => {
+          this.buildKeyButton(item?.label)
+        })
+      }
+
+      // 第三行
+      Row() {
+        ForEach(this.threeRowList, (item: textItem) => {
+          this.buildKeyButton(item?.label)
+        })
+      }
+
+      // 第四行
+      Row() {
+        ForEach(this.fourRowList, (item: textItem) => {
+          this.buildKeyButton(item?.label, false, item?.label === '完成')
+        })
+      }
+    }
+    .width('100%')
+    .backgroundColor('#F5F5F5')
+  }
+
+  private dynamicTextHandle = (label: string) => {
+    let dynamicText = label;
+    if (label === '完成' && this.calculation.operator) {
+      dynamicText = '='
+    }
+    return dynamicText;
+  }
+
+  @Builder
+  buildKeyButton(label: string, isBlank: boolean = false, isConfirm: boolean = false) {
+    Button() {
+      Row({ space: 4 }) {
+        if (label === '今天') {
+          Text('\ue624')
+            .fontFamily('myFont')
+            .fontSize(20)
+            .fontColor('#333333')
+        }
+        Text(this.dynamicTextHandle(label))
+          .fontSize(20)
+          .fontWeight(500)
+          .fontColor('#333333')
+      }
+    }
+    .type(ButtonType.Normal)
+    .width('25%')
+    .height(56)
+    .fontSize(20)
+    .fontWeight(500)
+    .fontColor('#333333')
+    .backgroundColor(isConfirm ? '#FFD700' : '#FFFFFF')
+    .onClick(() => this.handleKeyPress(this.dynamicTextHandle(label)))
+    .visibility(isBlank ? Visibility.Hidden : Visibility.Visible)
+  }
+
+  private handleKeyPress(key: string) {
+    switch (key) {
+      case '+':
+      case '-':
+        this.handleOperator(key);
+        break;
+      case '=':
+        this.calculateResult();
+        break;
+      case 'x': // 清除操作
+        this.clearCalculation();
+        break;
+      case '今天':
+        // 原有日期处理
+        break;
+      default:
+        this.processAmountInput(key);
+    }
+  }
+
+  private handleOperator(operator: '+' | '-' | '×') {
+    // 清除无效字符
+    const cleanAmount = this.amount.replace(/[^0-9.]/g, '');
+
+    // 忽略无效操作
+    if (cleanAmount === '0.00' && !this.calculation.firstOperand) {
+      return;
+    }
+
+    // 自动完成上一个计算
+    if (this.calculation.operator && this.calculation.firstOperand) {
+      this.calculateResult();
+    }
+
+    this.calculation = {
+      firstOperand: cleanAmount,
+      operator
+    };
+    this.amount = '0.00';
+  }
+
+  private calculateResult() {
+    const first = parseFloat(this.calculation.firstOperand);
+    const second = parseFloat(this.amount.replace(/[^0-9.]/g, ''));
+
+    let result = 0;
+    switch (this.calculation.operator) {
+      case '+':
+        result = first + second;
+        break;
+      case '-':
+        result = first - second;
+        break;
+      case '×':
+        result = first * second;
+        break;
+    }
+
+    // 格式化显示（保留两位小数，去除多余0）
+    this.amount = result % 1 === 0 ?
+    result.toString() :
+    result.toFixed(2).replace(/\.?0+$/, '');
+
+    this.calculation = { firstOperand: '', operator: '' };
+  }
+
+  private clearCalculation() {
+    this.amount = '0.00';
+    this.calculation = { firstOperand: '', operator: '' };
+    this.showKeyboard = true; // 保持键盘打开
+  }
+
+  private processAmountInput(key: string) {
+    // 重置计算状态时的输入
+    if (this.calculation.operator && this.amount === '0.00') {
+      this.amount = '';
+    }
+
+    // 过滤非数字输入
+    if (!/[\d.]/.test(key)) {
+      return;
+    }
+
+    // 处理小数点
+    if (key === '.') {
+      if (this.amount.includes('.')) {
+        return;
+      }
+      this.amount = this.amount === '0.00' ? '0.' : this.amount + '.';
+      return;
+    }
+
+    // 正常数字输入
+    this.amount = this.amount === '0.00' ?
+      key :
+      this.amount.replace(/[^0-9.]/g, '') + key;
+  }
+
+  // 点击 +
+  private submitCalculator() {
+    console.log(`计算数值: ${this.selectedCategory} ¥${this.amount}}`);
+    this.note = this.amount + this.amount
+    this.showKeyboard = false;
+  }
+
+  // 点击完成
+  private submitExpense() {
+    console.log(`记录支出: ${this.selectedCategory} ¥${this.amount} 备注: ${this.note}`);
+    this.showKeyboard = false;
+    // 实际项目这里调用API提交数据
+  }
+
   build() {
     Stack() {
       // 主内容区（带动画）
@@ -237,7 +540,10 @@ struct AccountPage {
                     .fontColor('#333333')
                 }
               }
-              .onClick(() => this.selectCategory(item.name))
+              .onClick(() => {
+                this.selectCategory(item.name);
+                this.showKeyboard = true;
+              })
             }
           })
         }
@@ -256,6 +562,11 @@ struct AccountPage {
         })
 
         // .opacity(this.listAnimation.opacity)
+
+        // 数字键盘（条件渲染）
+        if (this.showKeyboard) {
+          this.buildNumberKeyboard()
+        }
 
         if (this.translateY === 1000) {
           // 底部TabBar
