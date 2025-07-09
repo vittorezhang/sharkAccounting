@@ -5,7 +5,6 @@ import { AuthToken } from '../viewModel/commonFunction';
 @Entry
 @Component
 struct AccountSettingsPage {
-  @State isLoggedIn: boolean = true;
   @State currentAccount: AuthToken | null = null;
 
   // 注销账户
@@ -45,9 +44,25 @@ struct AccountSettingsPage {
   }
 
   // 退出登录
-  private handleLogOut = () => {
-    // 实际项目应调用退出接口
-    this.isLoggedIn = false; // 仅更改登录状态
+  private handleLogOut = async () => {
+    // 实际项目应调用退出接口 当前仅更改登录状态
+    if (!this.currentAccount) {
+      return;
+    }
+    // 更新账户Token（严格类型）
+    const updatedAccount: AuthToken = {
+      id: this.currentAccount.id,
+      username: this.currentAccount.username,
+      password: this.currentAccount.password,
+      gender: '男',
+      timestamp: Date.now(),
+      token: '',
+      tokenExpire: 0
+    };
+    console.log('updatedAccount', JSON.stringify(updatedAccount))
+    // 存储并设为当前账户
+    await StorageUtil.setAccount(updatedAccount);
+    await StorageUtil.setCurrentAccount(this.currentAccount.id);
     promptAction.showToast({ message: '已退出当前登录' });
     router.replaceUrl({
       url: 'pages/Index',
