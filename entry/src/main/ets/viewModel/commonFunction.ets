@@ -60,3 +60,9 @@ export interface RouteData {
   currentRoutePath: string,
   currentIndex: number
 }
+
+export interface CacheItem<T = RouteData> {
+  key: string;
+  value: T;
+  ttl?: number;
+}

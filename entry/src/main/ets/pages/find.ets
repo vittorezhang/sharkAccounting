@@ -1,6 +1,7 @@
 import TabBar from '../components/TabBar'
 import BudgetRow from '../components/BudgetRow'
-import { budgetRowItem, iconItem } from '../viewModel/commonFunction'
+import { budgetRowItem, iconItem, RouteData } from '../viewModel/commonFunction'
+import { MemoryCache } from '../../../utils/MemoryCache'
 
 @Entry
 @Component
@@ -21,11 +22,18 @@ struct FindPage {
   ]
 
   onPageShow() {
-    // 会话存储路由数据
-    console.log('会话存储路由数据--pages/find')
-    AppStorage.set('tempRouteData', {
+    // 临时存储路由数据
+    console.log('临时存储路由数据--pages/find')
+    const routeData: RouteData = {
       currentRoutePath: 'pages/find',
       currentIndex: this.currentIndex
+    };
+
+    // 存储1200秒自动过期
+    MemoryCache.set('cache_route', {
+      key: 'cache_route',
+      value: routeData,
+      ttl: 1200000 // 1200秒后自动删除
     });
   }
 

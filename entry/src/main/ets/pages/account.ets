@@ -1,14 +1,10 @@
 import { router } from '@kit.ArkUI'
+import { MemoryCache } from '../../../utils/MemoryCache';
 import TabBar from '../components/TabBar'
-import { RouteData } from '../viewModel/commonFunction';
 
 @Entry
 @Component
 struct AccountPage {
-  @StorageLink('tempRouteData') tempRouteData: RouteData = {
-    currentRoutePath: '',
-    currentIndex: 2
-  };
   @State private currentIndex: number = 2
   @State translateY: number = 1000 // 初始在屏幕外
   @State selectedTab: string = '支出'
@@ -50,7 +46,12 @@ struct AccountPage {
   ]
 
   onPageShow(): void {
-    console.log('this.tempRouteData?.currentRoutePath', this.tempRouteData?.currentRoutePath)
+    const cached = MemoryCache.get('cache_route');
+    console.log('--cached--', JSON.stringify(cached))
+  }
+
+  onPageHide(): void {
+    MemoryCache.delete('cache_route');
   }
 
   build() {
@@ -147,7 +148,7 @@ struct AccountPage {
     }, () => {
       this.translateY = 1000
     })
-    router.replaceUrl({ url: this.tempRouteData?.currentRoutePath || 'pages/detail' });
+    router.replaceUrl({ url: MemoryCache.get('cache_route')?.value.currentRoutePath || 'pages/detail' });
   }
 
   private switchTab(tab: string) {

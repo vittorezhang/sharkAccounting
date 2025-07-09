@@ -1,5 +1,7 @@
 import TabBar from '../components/TabBar'
 import FinanceHeader from '../components/FinanceHeader'
+import { MemoryCache } from '../../../utils/MemoryCache';
+import { RouteData } from '../viewModel/commonFunction';
 
 interface Transaction {
   type: string;
@@ -31,11 +33,18 @@ struct DetailPage {
   ];
 
   onPageShow() {
-    // 会话存储路由数据
-    console.log('会话存储路由数据--pages/detail')
-    AppStorage.set('tempRouteData', {
+    // 临时存储路由数据
+    console.log('临时存储路由数据--pages/detail')
+    const routeData: RouteData = {
       currentRoutePath: 'pages/detail',
       currentIndex: this.currentIndex
+    };
+
+    // 存储1200秒自动过期
+    MemoryCache.set('cache_route', {
+      key: 'cache_route',
+      value: routeData,
+      ttl: 1200000 // 1200秒后自动删除
     });
   }
 

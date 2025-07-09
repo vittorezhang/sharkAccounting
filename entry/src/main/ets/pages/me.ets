@@ -1,7 +1,8 @@
 import TabBar from '../components/TabBar';
 import { promptAction, router } from '@kit.ArkUI';
 import { StorageUtil } from '../../../utils/storage';
-import { actionBarItem, AuthToken, operateAreaItem, statsItem } from '../viewModel/commonFunction';
+import { actionBarItem, AuthToken, operateAreaItem, RouteData, statsItem } from '../viewModel/commonFunction';
+import { MemoryCache } from '../../../utils/MemoryCache';
 
 @Entry
 @Component
@@ -50,11 +51,18 @@ struct MePage {
   }
 
   onPageShow() {
-    // 会话存储路由数据
-    console.log('会话存储路由数据--pages/me')
-    AppStorage.set('tempRouteData', {
+    // 临时存储路由数据
+    console.log('临时存储路由数据--pages/me')
+    const routeData: RouteData = {
       currentRoutePath: 'pages/me',
       currentIndex: this.currentIndex
+    };
+
+    // 存储1200秒自动过期
+    MemoryCache.set('cache_route', {
+      key: 'cache_route',
+      value: routeData,
+      ttl: 1200000 // 1200秒后自动删除
     });
   }
 
