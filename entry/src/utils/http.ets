@@ -1,5 +1,5 @@
 import { http } from '@kit.NetworkKit';
-import { loginItem } from '../main/ets/viewModel/commonFunction';
+import { registerItem } from '../main/ets/viewModel/commonFunction';
 import httpResponse from '../main/ets/viewModel/HttpResponse';
 
 export class HttpUtil {
@@ -9,7 +9,7 @@ export class HttpUtil {
    */
   static async post(
     url: string,
-    data: loginItem
+    data: registerItem
   ): Promise<httpResponse> {
     const httpRequest = http.createHttp();
     const response = await httpRequest.request(url, {
