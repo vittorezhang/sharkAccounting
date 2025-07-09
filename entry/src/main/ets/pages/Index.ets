@@ -97,7 +97,7 @@ struct IndexPage {
       return;
     }
 
-    //  生成新Token（有效期1分钟）
+    //  生成新Token
     const newToken = StorageUtil.generateToken(targetAccount.id);
     const tokenExpire = Date.now() + 120 * 60 * 1000;
 

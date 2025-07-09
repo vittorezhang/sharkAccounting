@@ -21,7 +21,8 @@ struct FindPage {
   ]
 
   onPageShow() {
-    // 存储数据
+    // 会话存储路由数据
+    console.log('会话存储路由数据--pages/find')
     AppStorage.set('tempRouteData', {
       currentRoutePath: 'pages/find',
       currentIndex: this.currentIndex

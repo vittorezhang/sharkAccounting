@@ -49,6 +49,10 @@ struct AccountPage {
     { name: '亲友', icon: $r('app.media.sharkAccounting') }
   ]
 
+  onPageShow(): void {
+    console.log('this.tempRouteData?.currentRoutePath', this.tempRouteData?.currentRoutePath)
+  }
+
   build() {
     Stack() {
       // 主内容区（带动画）
@@ -143,7 +147,7 @@ struct AccountPage {
     }, () => {
       this.translateY = 1000
     })
-    router.replaceUrl({ url: this.tempRouteData?.currentRoutePath });
+    router.replaceUrl({ url: this.tempRouteData?.currentRoutePath || 'pages/detail' });
   }
 
   private switchTab(tab: string) {

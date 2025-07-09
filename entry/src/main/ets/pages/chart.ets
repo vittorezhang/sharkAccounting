@@ -6,7 +6,8 @@ struct ChartPage {
   @State private currentIndex: number = 1
 
   onPageShow() {
-    // 存储数据
+    // 会话存储路由数据
+    console.log('会话存储路由数据--pages/chart')
     AppStorage.set('tempRouteData', {
       currentRoutePath: 'pages/chart',
       currentIndex: this.currentIndex
