@@ -75,6 +75,7 @@ export default struct TabBar {
                 .width(index === 2 ? 48 : '100%')
                 .height(index === 2 ? 48 : '100%')
                 .margin({ bottom: index === 2 ? 56 : 0 })
+                .onClick(() => this.currentIndex = index)
 
               if (item.hasRedDot) {
                 Circle()
@@ -88,9 +89,13 @@ export default struct TabBar {
             Text(index === 2 ? item.name : '')
               .fontSize(12)
               .margin({ top: index === 2 ? -20 : 0 })
+              .onClick(() => {
+                if (index === 2) {
+                  this.currentIndex = index
+                }
+              })
           }
           .width('20%')
-          .onClick(() => this.currentIndex = index)
         })
       }
       .height(56)
