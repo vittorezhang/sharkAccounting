@@ -348,13 +348,12 @@ struct AccountPage {
     Button() {
       Row({ space: 4 }) {
         if (label === '今天') {
-          Text('\ue624')
-            .fontFamily('myFont')
-            .fontSize(20)
-            .fontColor('#333333')
+          Image($r('app.media.calendar'))
+            .width(20)
+            .height(20)
         }
         Text(this.dynamicTextHandle(label))
-          .fontSize(20)
+          .fontSize(18)
           .fontWeight(500)
           .fontColor('#333333')
       }
