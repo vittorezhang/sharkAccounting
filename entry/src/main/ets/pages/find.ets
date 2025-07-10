@@ -123,6 +123,7 @@ struct FindPage {
             x: 0, // 距离左侧20vp
             y: 46  // 距离顶部100vp
           })
+          .zIndex(99)
 
           Scroll() {
             // 2. 主内容区
