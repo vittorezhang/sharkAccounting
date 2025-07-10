@@ -16,30 +16,30 @@ struct MePage {
     totalRecords: 2
   };
   private actionBarList: actionBarItem[] = [
-    { name: '消息', icon: 'app.media.sms_app_icon' },
-    { name: '我的徽章', icon: 'app.media.sms_app_icon' },
-    { name: '我的积分', icon: 'app.media.sms_app_icon' },
-    { name: '邀请好友', icon: 'app.media.sms_app_icon' },
-    { name: '设置', icon: 'app.media.sms_app_icon' },
+    { name: '消息', icon: 'app.media.message' },
+    { name: '我的徽章', icon: 'app.media.my_badge' },
+    { name: '我的积分', icon: 'app.media.my_point' },
+    { name: '邀请好友', icon: 'app.media.invite_friend' },
+    { name: '设置', icon: 'app.media.setting' },
   ]
   // 账本管理区
   private accountAreaList: operateAreaItem[] = [
-    { name: '我的账本', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
-    { name: '家庭账单', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
+    { name: '我的账本', leftIcon: 'app.media.my_account_book', rightIcon: 'app.media.ic_arrow_right' },
+    { name: '家庭账单', leftIcon: 'app.media.home_bills', rightIcon: 'app.media.ic_arrow_right' },
   ]
   // 操作区
   private operateAreaList: operateAreaItem[] = [
-    { name: '设置', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
+    { name: '设置', leftIcon: 'app.media.setting_none', rightIcon: 'app.media.ic_arrow_right' },
     {
       name: '账户安全中心',
-      leftIcon: 'app.media.sharkAccounting',
+      leftIcon: 'app.media.account_safe_center',
       rightIcon: 'app.media.ic_arrow_right',
       hasWarning: true
     },
-    { name: '使用帮助', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
-    { name: '意见反馈', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
-    { name: '去应用市场给鲨鱼记账评分', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
-    { name: '关于鲨鱼记账 V5.30.0', leftIcon: 'app.media.sharkAccounting', rightIcon: 'app.media.ic_arrow_right' },
+    { name: '使用帮助', leftIcon: 'app.media.use_help', rightIcon: 'app.media.ic_arrow_right' },
+    { name: '意见反馈', leftIcon: 'app.media.feed_back', rightIcon: 'app.media.ic_arrow_right' },
+    { name: '去应用市场给鲨鱼记账评分', leftIcon: 'app.media.thumbs_up', rightIcon: 'app.media.ic_arrow_right' },
+    { name: '关于鲨鱼记账 V5.30.0', leftIcon: 'app.media.about', rightIcon: 'app.media.ic_arrow_right' },
   ]
 
   aboutToAppear() {
@@ -166,9 +166,9 @@ struct MePage {
               // VIP升级提示
               Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
                 Row({ space: 8 }) {
-                  Image($r('app.media.wechat_icon'))
-                    .width(20)
-                    .height(20)
+                  Image($r('app.media.upgrade'))
+                    .width(32)
+                    .height(32)
                   Column() {
                     Text('升级为VIP')
                       .fontSize(16)
@@ -205,8 +205,8 @@ struct MePage {
                   ForEach(this.actionBarList, (item: actionBarItem) => {
                     Column() {
                       Image($r(item.icon))
-                        .width(24)
-                        .height(24)
+                        .width(32)
+                        .height(32)
                       Text(item.name)
                         .fontSize(12)
                         .fontColor('#333333')
@@ -233,8 +233,8 @@ struct MePage {
                         Row({ space: 4 }) {
                           // 左侧图标
                           Image($r(item.leftIcon))
-                            .width(20)
-                            .height(20)
+                            .width(22)
+                            .height(22)
                           Column() {
                             Text(item.name)
                               .fontSize(16)
@@ -282,8 +282,8 @@ struct MePage {
                         Row({ space: 4 }) {
                           // 左侧图标
                           Image($r(item.leftIcon))
-                            .width(20)
-                            .height(20)
+                            .width(22)
+                            .height(22)
                           Column() {
                             Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Baseline }) {
                               Text(item.name)
