@@ -7,11 +7,11 @@ export default struct FinanceHeader {
   @State income: number = 198;
   @State expenses: number = 0;
   private actionBarList: actionBarItem[] = [
-    { name: '账单', icon: 'app.media.sms_app_icon' },
-    { name: '预算', icon: 'app.media.sms_app_icon' },
-    { name: '资产管家', icon: 'app.media.sms_app_icon' },
-    { name: '购物返现', icon: 'app.media.sms_app_icon' },
-    { name: '更多', icon: 'app.media.sms_app_icon' },
+    { name: '账单', icon: 'app.media.detail_bill' },
+    { name: '预算', icon: 'app.media.detail_budget' },
+    { name: '资产管家', icon: 'app.media.detail_assetManage' },
+    { name: '购物返现', icon: 'app.media.detail_shopRefund' },
+    { name: '更多', icon: 'app.media.detail_more' },
   ]
 
   build() {
@@ -37,7 +37,7 @@ export default struct FinanceHeader {
                   Text('月')
                     .fontSize(12)
                     .fontColor('#333333')
-                  Image($r('app.media.sharkAccounting'))// 下拉箭头图标
+                  Image($r('app.media.detail_below'))
                     .width(16)
                     .height(16)
                     .padding({ left: 4 })
@@ -109,8 +109,8 @@ export default struct FinanceHeader {
             ForEach(this.actionBarList, (item: actionBarItem, index) => {
               Column() {
                 Image($r(item.icon))
-                  .width(24)
-                  .height(24)
+                  .width(32)
+                  .height(32)
                 Text(item.name)
                   .fontSize(12)
                   .fontColor('#999999')

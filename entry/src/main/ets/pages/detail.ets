@@ -53,9 +53,9 @@ struct DetailPage {
       // 1. 顶部标题栏
       Flex({ justifyContent: FlexAlign.SpaceAround, alignItems: ItemAlign.Center }) {
         Row() {
-          Image($r('app.media.shark_logo'))
-            .width(24)
-            .height(24)
+          Image($r('app.media.left_logo'))
+            .width(32)
+            .height(32)
         }
         .width('14%')
         .justifyContent(FlexAlign.End)
