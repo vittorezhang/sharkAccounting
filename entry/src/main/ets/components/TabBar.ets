@@ -35,9 +35,9 @@ export default struct TabBar {
 
     AuthInterceptor.checkRouteAccess(targetRoute).then(valid => {
       if (valid === false && AuthInterceptor.shouldCheckToken(targetRoute)) {
-        console.log('token已失效，请重新登录');
+        console.log('登录已过期，请重新登录');
         promptAction.showToast({
-          message: 'token已失效，请重新登录',
+          message: '登录已过期，请重新登录',
           duration: 1500,
         });
         // 设置新定时器
