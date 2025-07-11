@@ -28,7 +28,7 @@ export class StorageUtil {
     if (!parsed.expenseOrIncomeData) {
       return
     }
-    const existingIndex = parsed.expenseOrIncomeData.findIndex(a => a.category === record.category);
+    const existingIndex = parsed.expenseOrIncomeData.findIndex(a => a.id === record.id);
     if (existingIndex >= 0) {
       parsed.expenseOrIncomeData[existingIndex] = record;
     } else {
@@ -59,7 +59,7 @@ export class StorageUtil {
   }
 
   // 获取记账记录
-  public static async getAccountingRecords(category: string): Promise<AccountingRecord | null> {
+  public static async getAccountingRecords(id: string): Promise<AccountingRecord | null> {
     const pref = await StorageUtil.getPreferences();
     const value = await pref.get(StorageUtil.ACCOUNT_LIST_KEY, '');
     const parsed = JSON.parse(value.toString()) as AccountList;
@@ -67,7 +67,7 @@ export class StorageUtil {
     if(!parsed.expenseOrIncomeData){
       return null
     }
-    return parsed.expenseOrIncomeData.find(a => a.category === category) || null;
+    return parsed.expenseOrIncomeData.find(a => a.id === id) || null;
   }
 
   // -------------------记账数据 end------------------

@@ -4,7 +4,17 @@ import { MemoryCache } from '../../../utils/MemoryCache';
 import { AccountingRecord, AuthToken, RouteData } from '../viewModel/commonFunction';
 import { StorageUtil } from '../../../utils/storage';
 import font from '@ohos.font';
-import { router } from '@kit.ArkUI';
+import { promptAction, router } from '@kit.ArkUI';
+import BadgeDialog from '../components/BadgeDialog';
+
+interface editPositionItem {
+  x: number;
+  y: number;
+}
+
+interface RouteParams {
+  categoryType?: string;
+}
 
 @Entry
 @Component
@@ -15,6 +25,95 @@ struct DetailPage {
   @State income: number = 0;
   @State expenses: number = 0;
   @State transactions: AccountingRecord[] = [];
+  // 徽章 弹窗状态
+  @State budgeVisible: boolean = false;
+  // 状态管理【长按】
+  @State isEditing: boolean = false;
+  @State editPosition: editPositionItem = { x: 0, y: 0 };
+  @State currentEditCategory: string = '';
+  @State currentEditCategoryId: string = '';
+
+  // 获取记账数据
+  private async getCategory() {
+    // 查账户下所有记账数据
+    const result = await StorageUtil.getCurrentAccount();
+    console.log('result',JSON.stringify(result));
+    if (!result?.expenseOrIncomeData) {
+      return;
+    }
+    this.transactions = result?.expenseOrIncomeData;
+    // 筛选收入累计、支出累计
+    result?.expenseOrIncomeData?.forEach((mItem: AccountingRecord) => {
+      if (mItem.type === 'income') {
+        this.income += mItem?.amount || 0;
+      } else {
+        this.expenses += mItem?.amount || 0;
+      }
+    });
+  };
+
+  // 修改记账数据
+  private saveCategory(item: AccountingRecord) {
+    if (!this.currentAccount?.id) {
+      return;
+    }
+    // 1. 获取当前数据
+    const selectedCategory = this.currentEditCategory || item.category || '其他';
+    // 2. 创建新记录
+    const newRecord: AccountingRecord = {
+      currentAccountId: this.currentAccount.id,
+      id: item.id,
+      accountId: this.currentAccount.id,
+      type: item.type,
+      selectedIcon: item.selectedIcon,
+      category: selectedCategory,
+      amount: item.amount,
+      remark: item.remark || undefined, // 从备注输入框获取
+      createTime: new Date().toISOString()
+    };
+    // 保存记账数据
+    StorageUtil.saveAccountingRecord(newRecord);
+    promptAction.showToast({ message: `保存成功` })
+    setTimeout(() => {
+      // 刷新记账列表
+      this.getCategory();
+    }, 1000)
+  }
+
+  // 长按手势处理
+  private handleLongPress(event: GestureEvent, item: AccountingRecord) {
+    this.isEditing = true;
+    this.currentEditCategoryId = item.id;
+    this.currentEditCategory = item.category;
+
+    // 获取点击位置（适配不同设备）
+    this.editPosition = {
+      x: event.offsetX + 50,
+      y: event.offsetY + 15 // 下移30px避免遮挡
+    };
+  }
+
+  // 编辑框组件
+  @Builder
+  editCategoryInput(item: AccountingRecord) {
+    if (this.isEditing) {
+      Column() {
+        TextInput({ text: this.currentEditCategory })
+          .width('60%')
+          .height(40)
+          .backgroundColor('#FFFFFF')
+          .border({ width: 1, color: '#FFD700' })
+          .onChange((value) => {
+            this.currentEditCategory = value;
+          })
+          .onBlur(() => {
+            this.saveCategory(item);
+          })
+      }
+      .position({ x: this.editPosition.x, y: this.editPosition.y })
+      .zIndex(999)
+    }
+  }
 
   private getFormattedDate(): string {
     const now = new Date();
@@ -48,20 +147,13 @@ struct DetailPage {
     StorageUtil.getCurrentAccount().then(account => {
       this.currentAccount = account;
     });
-    // 查账户下所有记账数据
-    const result = await StorageUtil.getAccountList();
-    if (!result?.expenseOrIncomeData) {
-      return;
+    // 获取记账数据
+    this.getCategory();
+    // 徽章弹窗判断
+    const params = router.getParams() as RouteParams;
+    if (params?.categoryType == '工资') {
+      this.budgeVisible = true;
     }
-    this.transactions = result?.expenseOrIncomeData;
-    // 筛选收入累计、支出累计
-    result?.expenseOrIncomeData?.forEach((mItem: AccountingRecord) => {
-      if (mItem.type === 'income') {
-        this.income += mItem?.amount || 0;
-      } else {
-        this.expenses += mItem?.amount || 0;
-      }
-    });
   }
 
   build() {
@@ -141,6 +233,7 @@ struct DetailPage {
                     router.replaceUrl({
                       url: 'pages/account',
                       params: {
+                        currentCategoryId: item.id,
                         currentCategory: item.category,
                         currentIcon: item.selectedIcon,
                       }
@@ -165,6 +258,17 @@ struct DetailPage {
                     color: '#F5F5F5'
                   })
                   .padding(16)
+                  .gesture(
+                    LongPressGesture({ repeat: false })
+                      .onAction((event: GestureEvent) => {
+                        this.handleLongPress(event, item);
+                      })
+                  )
+
+                  if (this.currentEditCategoryId === item.id) {
+                    // 编辑框（放在Stack最上层）
+                    this.editCategoryInput(item)
+                  }
                 }
                 .width('100%')
                 .borderRadius(8)
@@ -184,9 +288,26 @@ struct DetailPage {
 
       // 3. 底部TabBar
       TabBar({ currentIndex: $currentIndex })
+
+      // 4 徽章弹窗 【工资进账了】
+      if (this.budgeVisible) {
+        BadgeDialog({
+          onClose: (bool: boolean) => {
+            this.budgeVisible = bool;
+          }
+        })
+      }
     }
     .width('100%')
     .height('100%')
     .backgroundColor('#F5F5F5')
+    .onClick(() => {
+      if (this.isEditing) {
+        //清空【 收入、支出】
+        this.income = 0
+        this.expenses = 0
+        this.isEditing = false; // 点击其他区域关闭编辑
+      }
+    })
   }
 }

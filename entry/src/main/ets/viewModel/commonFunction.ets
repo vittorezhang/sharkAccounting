@@ -49,6 +49,7 @@ export interface AuthToken {
   wechat?: string;
   emergencyContact?: string;
   timestamp: number;
+  expenseOrIncomeData?: AccountingRecord[]
 }
 
 export interface AccountList {

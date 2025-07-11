@@ -6,6 +6,7 @@ import { AccountData, AccountingRecord, AuthToken } from '../viewModel/commonFun
 import { StorageUtil } from '../../../utils/storage';
 
 interface Category {
+  id: string;
   name: string;
   icon: string;
   selectedIcon: string;
@@ -31,8 +32,9 @@ interface GeneratedTypeLiteralInterface_2 {
 }
 
 interface RouteParams {
-  currentCategory: string;
-  currentIcon: string;
+  currentCategoryId?: string;
+  currentCategory?: string;
+  currentIcon?: string;
 }
 
 @Entry
@@ -50,6 +52,7 @@ struct AccountPage {
   @State selectedTab: string = '支出'
   @State selectedIcon: string = ''
   @State selectedCategory: string = ''
+  @State selectedCategoryId: string = ''
   @State amount: string = '0.00'
   @State showKeyboard: boolean = false
   @State note: string = ''
@@ -87,49 +90,249 @@ struct AccountPage {
   ];
   // 支出的分类数据
   @State expensesCategories: Category[] = [
-    { name: '餐饮', icon: '\ue8a4', selectedIcon: 'e8a4' },
-    { name: '购物', icon: '\ue899', selectedIcon: 'e899' },
-    { name: '日用', icon: '\ue604', selectedIcon: 'e604' },
-    { name: '交通', icon: '\ue61e', selectedIcon: 'e61e' },
-    { name: '蔬菜', icon: '\ue713', selectedIcon: 'e713' },
-    { name: '水果', icon: '\ue631', selectedIcon: 'e631' },
-    { name: '零食', icon: '\ue625', selectedIcon: 'e625' },
-    { name: '运动', icon: '\ue69b', selectedIcon: 'e69b' },
-    { name: '娱乐', icon: '\ue639', selectedIcon: 'e639' },
-    { name: '通讯', icon: '\ue632', selectedIcon: 'e632' },
-    { name: '服饰', icon: '\ue60d', selectedIcon: 'e60d' },
-    { name: '美容', icon: '\ue657', selectedIcon: 'e657' },
-    { name: '住房', icon: '\ue63b', selectedIcon: 'e63b' },
-    { name: '居家', icon: '\ue61b', selectedIcon: 'e61b' },
-    { name: '孩子', icon: '\ue84e', selectedIcon: 'e84e' },
-    { name: '长辈', icon: '\ue654', selectedIcon: 'e654' },
-    { name: '社交', icon: '\ue615', selectedIcon: 'e615' },
-    { name: '旅行', icon: '\ue655', selectedIcon: 'e655' },
-    { name: '烟酒', icon: '\ue60f', selectedIcon: 'e60f' },
-    { name: '数码', icon: '\ue611', selectedIcon: 'e611' },
-    { name: '汽车', icon: '\ue65d', selectedIcon: 'e65d' },
-    { name: '医疗', icon: '\ue646', selectedIcon: 'e646' },
-    { name: '书籍', icon: '\ue606', selectedIcon: 'e606' },
-    { name: '学习', icon: '\ue763', selectedIcon: 'e763' },
-    { name: '宠物', icon: '\ue90d', selectedIcon: 'e90d' },
-    { name: '礼金', icon: '\ue651', selectedIcon: 'e651' },
-    { name: '礼物', icon: '\ue600', selectedIcon: 'e600' },
-    { name: '办公', icon: '\ue624', selectedIcon: 'e624' },
-    { name: '维修', icon: '\ue633', selectedIcon: 'e633' },
-    { name: '捐赠', icon: '\ue634', selectedIcon: 'e634' },
-    { name: '彩票', icon: '\ue613', selectedIcon: 'e613' },
-    { name: '亲友', icon: '\ue61d', selectedIcon: 'e61d' },
-    { name: '快递', icon: '\ue696', selectedIcon: 'e696' },
-    { name: '设置', icon: '\ue605', selectedIcon: 'e605' }
+    {
+      id: '0',
+      name: '餐饮',
+      icon: '\ue8a4',
+      selectedIcon: 'e8a4'
+    },
+    {
+      id: '1',
+      name: '购物',
+      icon: '\ue899',
+      selectedIcon: 'e899'
+    },
+    {
+      id: '2',
+      name: '日用',
+      icon: '\ue604',
+      selectedIcon: 'e604'
+    },
+    {
+      id: '3',
+      name: '交通',
+      icon: '\ue61e',
+      selectedIcon: 'e61e'
+    },
+    {
+      id: '4',
+      name: '蔬菜',
+      icon: '\ue713',
+      selectedIcon: 'e713'
+    },
+    {
+      id: '5',
+      name: '水果',
+      icon: '\ue631',
+      selectedIcon: 'e631'
+    },
+    {
+      id: '6',
+      name: '零食',
+      icon: '\ue625',
+      selectedIcon: 'e625'
+    },
+    {
+      id: '7',
+      name: '运动',
+      icon: '\ue69b',
+      selectedIcon: 'e69b'
+    },
+    {
+      id: '8',
+      name: '娱乐',
+      icon: '\ue639',
+      selectedIcon: 'e639'
+    },
+    {
+      id: '9',
+      name: '通讯',
+      icon: '\ue632',
+      selectedIcon: 'e632'
+    },
+    {
+      id: '10',
+      name: '服饰',
+      icon: '\ue60d',
+      selectedIcon: 'e60d'
+    },
+    {
+      id: '11',
+      name: '美容',
+      icon: '\ue657',
+      selectedIcon: 'e657'
+    },
+    {
+      id: '12',
+      name: '住房',
+      icon: '\ue63b',
+      selectedIcon: 'e63b'
+    },
+    {
+      id: '13',
+      name: '居家',
+      icon: '\ue61b',
+      selectedIcon: 'e61b'
+    },
+    {
+      id: '14',
+      name: '孩子',
+      icon: '\ue84e',
+      selectedIcon: 'e84e'
+    },
+    {
+      id: '15',
+      name: '长辈',
+      icon: '\ue654',
+      selectedIcon: 'e654'
+    },
+    {
+      id: '16',
+      name: '社交',
+      icon: '\ue615',
+      selectedIcon: 'e615'
+    },
+    {
+      id: '17',
+      name: '旅行',
+      icon: '\ue655',
+      selectedIcon: 'e655'
+    },
+    {
+      id: '18',
+      name: '烟酒',
+      icon: '\ue60f',
+      selectedIcon: 'e60f'
+    },
+    {
+      id: '19',
+      name: '数码',
+      icon: '\ue611',
+      selectedIcon: 'e611'
+    },
+    {
+      id: '20',
+      name: '汽车',
+      icon: '\ue65d',
+      selectedIcon: 'e65d'
+    },
+    {
+      id: '21',
+      name: '医疗',
+      icon: '\ue646',
+      selectedIcon: 'e646'
+    },
+    {
+      id: '22',
+      name: '书籍',
+      icon: '\ue606',
+      selectedIcon: 'e606'
+    },
+    {
+      id: '23',
+      name: '学习',
+      icon: '\ue763',
+      selectedIcon: 'e763'
+    },
+    {
+      id: '24',
+      name: '宠物',
+      icon: '\ue90d',
+      selectedIcon: 'e90d'
+    },
+    {
+      id: '25',
+      name: '礼金',
+      icon: '\ue651',
+      selectedIcon: 'e651'
+    },
+    {
+      id: '26',
+      name: '礼物',
+      icon: '\ue600',
+      selectedIcon: 'e600'
+    },
+    {
+      id: '27',
+      name: '办公',
+      icon: '\ue624',
+      selectedIcon: 'e624'
+    },
+    {
+      id: '28',
+      name: '维修',
+      icon: '\ue633',
+      selectedIcon: 'e633'
+    },
+    {
+      id: '29',
+      name: '捐赠',
+      icon: '\ue634',
+      selectedIcon: 'e634'
+    },
+    {
+      id: '30',
+      name: '彩票',
+      icon: '\ue613',
+      selectedIcon: 'e613'
+    },
+    {
+      id: '31',
+      name: '亲友',
+      icon: '\ue61d',
+      selectedIcon: 'e61d'
+    },
+    {
+      id: '32',
+      name: '快递',
+      icon: '\ue696',
+      selectedIcon: 'e696'
+    },
+    {
+      id: '33',
+      name: '设置',
+      icon: '\ue605',
+      selectedIcon: 'e605'
+    }
   ]
   // 收入的分类数据
   @State incomeCategories: Category[] = [
-    { name: '工资', icon: '\ue764', selectedIcon: 'e764' },
-    { name: '兼职', icon: '\ue61f', selectedIcon: 'e61f' },
-    { name: '理财', icon: '\ue623', selectedIcon: 'e623' },
-    { name: '礼金', icon: '\ue792', selectedIcon: 'e792' },
-    { name: '其它', icon: '\ue65a', selectedIcon: 'e65a' },
-    { name: '设置', icon: '\ue605', selectedIcon: 'e605' }
+    {
+      id: '00',
+      name: '工资',
+      icon: '\ue764',
+      selectedIcon: 'e764'
+    },
+    {
+      id: '01',
+      name: '兼职',
+      icon: '\ue61f',
+      selectedIcon: 'e61f'
+    },
+    {
+      id: '02',
+      name: '理财',
+      icon: '\ue623',
+      selectedIcon: 'e623'
+    },
+    {
+      id: '03',
+      name: '礼金',
+      icon: '\ue792',
+      selectedIcon: 'e792'
+    },
+    {
+      id: '04',
+      name: '其它',
+      icon: '\ue65a',
+      selectedIcon: 'e65a'
+    },
+    {
+      id: '05',
+      name: '设置',
+      icon: '\ue605',
+      selectedIcon: 'e605'
+    }
   ]
 
   onPageShow(): void {
@@ -140,8 +343,9 @@ struct AccountPage {
     })
     // 明细页 传过来的参数
     const params = router.getParams() as RouteParams;
-    if (params.currentCategory) {
-      this.selectedCategory = params.currentCategory;
+    if (params) {
+      this.selectedCategory = params?.currentCategory || '';
+      this.selectedCategoryId = params?.currentCategoryId || '';
       // 预留TODO
       // this.selectCategory({
       //   name: params.currentCategory,
@@ -227,6 +431,7 @@ struct AccountPage {
     }, () => {
       this.selectedIcon = item.icon
       this.selectedCategory = item.name
+      this.selectedCategoryId = item.id
     })
   }
 
@@ -481,7 +686,7 @@ struct AccountPage {
     // 2. 创建新记录
     const newRecord: AccountingRecord = {
       currentAccountId: this.currentAccount.id,
-      id: this.currentAccount.id,
+      id: this.selectedCategoryId,
       accountId: this.currentAccount.id,
       type: this.selectedTab === '支出' ? 'expense' : 'income',
       selectedIcon: this.selectedIcon,
@@ -495,7 +700,12 @@ struct AccountPage {
 
     setTimeout(() => {
       // 跳转明细页面
-      router.replaceUrl({ url: 'pages/detail' });
+      router.replaceUrl({
+        url: 'pages/detail',
+        params: {
+          categoryType: selectedCategory
+        }
+      });
     }, 1000)
   }
 
