@@ -111,7 +111,6 @@ struct IndexPage {
       tokenExpire: tokenExpire
     };
 
-    console.log('updatedAccount', JSON.stringify(updatedAccount))
     // 存储并设为当前账户
     await StorageUtil.setAccount(updatedAccount);
     await StorageUtil.setCurrentAccount(targetAccount.id);
@@ -370,7 +369,7 @@ struct IndexPage {
             }
             .onClick(() => {
               // 微信登录
-              console.log('微信登录');
+              promptAction.showToast({ message: '微信登录待开发' });
             })
             .width('90%')
             .height(48)

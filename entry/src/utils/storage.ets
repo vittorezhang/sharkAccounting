@@ -11,19 +11,14 @@ interface GeneratedTypeLiteralInterface {
 export class StorageUtil {
   private static readonly PREFERENCES_NAME = 'my_app_preferences';
   private static readonly ACCOUNT_LIST_KEY = 'account_list';
-  private static readonly CURRENT_ACCOUNT = 'current_account';
-  private static readonly ACCOUNTING_RECORDS = (accountId: string) => `accounting_records_${accountId}`;
-  private static readonly CATEGORIES = (accountId: string) => `categories_${accountId}`;
 
   // -------------------记账数据 start----------------------
 
-  //  保存记账记录
+  //  保存记账数据
   public static async saveAccountingRecord(record: AccountingRecord): Promise<void> {
-    console.log('记账了吗', JSON.stringify(record))
     const pref = await StorageUtil.getPreferences();
     const value = await pref.get(StorageUtil.ACCOUNT_LIST_KEY, '');
     const parsed = JSON.parse(value.toString()) as AccountList;
-    console.log('parsed', JSON.stringify(parsed))
     // 更新或新增数据
     if (!parsed.expenseOrIncomeData) {
       return
@@ -58,16 +53,24 @@ export class StorageUtil {
 
   }
 
-  // 获取记账记录
+  // 获取记账数据【所有账户】
   public static async getAccountingRecords(id: string): Promise<AccountingRecord | null> {
     const pref = await StorageUtil.getPreferences();
     const value = await pref.get(StorageUtil.ACCOUNT_LIST_KEY, '');
     const parsed = JSON.parse(value.toString()) as AccountList;
-    console.log('获取记账记录parsed', JSON.stringify(parsed))
-    if(!parsed.expenseOrIncomeData){
+    if (!parsed.expenseOrIncomeData) {
       return null
     }
     return parsed.expenseOrIncomeData.find(a => a.id === id) || null;
+  }
+
+  // 获取记账数据【当前账户】
+  public static async getCurrentAccountingRecord(accountId:string) {
+    const accountList = await StorageUtil.getAccountList();
+    if (!accountList?.expenseOrIncomeData) {
+      return null;
+    }
+    return accountList?.expenseOrIncomeData || null;
   }
 
   // -------------------记账数据 end------------------
@@ -166,7 +169,6 @@ export class StorageUtil {
 
   private static async saveAccountList(accountList: AccountList): Promise<void> {
     const pref = await StorageUtil.getPreferences();
-
     // 完全类型化的保存数据
     const saveData: AccountList = {
       currentAccountId: accountList.currentAccountId,
@@ -184,7 +186,6 @@ export class StorageUtil {
       }),
       expenseOrIncomeData: accountList.expenseOrIncomeData
     };
-
     await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(saveData));
     await pref.flush();
   }
@@ -230,7 +231,6 @@ export class StorageUtil {
     } else {
       accountList.accounts.push(token);
     }
-
     await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(accountList));
     await pref.flush();
   }

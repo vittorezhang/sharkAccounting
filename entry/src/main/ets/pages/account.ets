@@ -682,7 +682,6 @@ struct AccountPage {
     // 1. 获取当前数据
     const currentAmount = parseFloat(this.amount.replace(/[^0-9.]/g, ''));
     const selectedCategory = this.selectedCategory || '其他'; // 从界面获取选中分类
-    console.log('this.selectedIcon', this.selectedIcon)
     // 2. 创建新记录
     const newRecord: AccountingRecord = {
       currentAccountId: this.currentAccount.id,

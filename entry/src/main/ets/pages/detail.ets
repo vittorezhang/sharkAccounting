@@ -34,16 +34,23 @@ struct DetailPage {
   @State currentEditCategoryId: string = '';
 
   // 获取记账数据
-  private async getCategory() {
+  private async getCategory(accountId: string) {
     // 查账户下所有记账数据
-    const result = await StorageUtil.getCurrentAccount();
-    console.log('result',JSON.stringify(result));
-    if (!result?.expenseOrIncomeData) {
+    if (!accountId) {
+      return
+    }
+    const result = await StorageUtil.getCurrentAccountingRecord(accountId);
+    console.log('这是所有的记账数据', JSON.stringify(result));
+    if (!result) {
       return;
     }
-    this.transactions = result?.expenseOrIncomeData;
+    const currentAccountData = result
+    ?.filter(a => a.currentAccountId === accountId)
+      ?? [];
+    console.log('这是当前登录账户的记账数据', JSON.stringify(currentAccountData));
+    this.transactions = currentAccountData;
     // 筛选收入累计、支出累计
-    result?.expenseOrIncomeData?.forEach((mItem: AccountingRecord) => {
+    result?.forEach((mItem: AccountingRecord) => {
       if (mItem.type === 'income') {
         this.income += mItem?.amount || 0;
       } else {
@@ -75,8 +82,11 @@ struct DetailPage {
     StorageUtil.saveAccountingRecord(newRecord);
     promptAction.showToast({ message: `保存成功` })
     setTimeout(() => {
+      if (!this.currentAccount?.id) {
+        return;
+      }
       // 刷新记账列表
-      this.getCategory();
+      this.getCategory(this.currentAccount?.id);
     }, 1000)
   }
 
@@ -125,6 +135,9 @@ struct DetailPage {
   }
 
   async onPageShow() {
+    //初始化清空【 收入、支出】
+    this.income = 0
+    this.expenses = 0
     // 注册字体
     font.registerFont({
       familyName: 'myFont',
@@ -146,14 +159,17 @@ struct DetailPage {
     // 查当前账户信息
     StorageUtil.getCurrentAccount().then(account => {
       this.currentAccount = account;
+      if (!account?.id) {
+        return;
+      }
+      // 获取记账数据
+      this.getCategory(account?.id);
+      // 徽章弹窗判断
+      const params = router.getParams() as RouteParams;
+      if (params?.categoryType == '工资') {
+        this.budgeVisible = true;
+      }
     });
-    // 获取记账数据
-    this.getCategory();
-    // 徽章弹窗判断
-    const params = router.getParams() as RouteParams;
-    if (params?.categoryType == '工资') {
-      this.budgeVisible = true;
-    }
   }
 
   build() {
@@ -303,7 +319,7 @@ struct DetailPage {
     .backgroundColor('#F5F5F5')
     .onClick(() => {
       if (this.isEditing) {
-        //清空【 收入、支出】
+        //初始化清空【 收入、支出】
         this.income = 0
         this.expenses = 0
         this.isEditing = false; // 点击其他区域关闭编辑
