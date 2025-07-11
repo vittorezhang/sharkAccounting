@@ -1,38 +1,36 @@
 import TabBar from '../components/TabBar'
 import FinanceHeader from '../components/FinanceHeader'
 import { MemoryCache } from '../../../utils/MemoryCache';
-import { RouteData } from '../viewModel/commonFunction';
-
-interface Transaction {
-  type: string;
-  amount: number;
-  icon: string;
-  category: 'income' | 'expense';
-}
+import { AccountingRecord, AuthToken, RouteData } from '../viewModel/commonFunction';
+import { StorageUtil } from '../../../utils/storage';
+import font from '@ohos.font';
+import { router } from '@kit.ArkUI';
 
 @Entry
 @Component
 struct DetailPage {
   @State private currentIndex: number = 0
-  @State currentDate: string = '06月25日 星期三';
-  @State income: number = 198.00;
-  @State expenses: number = 0.00;
-  @State transactions: Transaction[] = [
-    {
-      type: '工资',
-      icon: 'app.media.sms_app_icon',
-      amount: 99,
-      category: 'income'
-    },
-    {
-      type: '兼职',
-      icon: 'app.media.sms_app_icon',
-      amount: 99,
-      category: 'income'
-    }
-  ];
+  @State currentAccount: AuthToken | null = null;
+  @State currentDate: string = this.getFormattedDate();
+  @State income: number = 0;
+  @State expenses: number = 0;
+  @State transactions: AccountingRecord[] = [];
 
-  onPageShow() {
+  private getFormattedDate(): string {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+
+    return `${month}月${day}日 星期${weekdays[now.getDay()]}`;
+  }
+
+  async onPageShow() {
+    // 注册字体
+    font.registerFont({
+      familyName: 'myFont',
+      familySrc: '/fonts/iconfont.ttf'
+    })
     // 临时存储路由数据
     console.log('临时存储路由数据--pages/detail')
     const routeData: RouteData = {
@@ -45,6 +43,24 @@ struct DetailPage {
       key: 'cache_route',
       value: routeData,
       ttl: 1200000 // 1200秒后自动删除
+    });
+    // 查当前账户信息
+    StorageUtil.getCurrentAccount().then(account => {
+      this.currentAccount = account;
+    });
+    // 查账户下所有记账数据
+    const result = await StorageUtil.getAccountList();
+    if (!result?.expenseOrIncomeData) {
+      return;
+    }
+    this.transactions = result?.expenseOrIncomeData;
+    // 筛选收入累计、支出累计
+    result?.expenseOrIncomeData?.forEach((mItem: AccountingRecord) => {
+      if (mItem.type === 'income') {
+        this.income += mItem?.amount || 0;
+      } else {
+        this.expenses += mItem?.amount || 0;
+      }
     });
   }
 
@@ -78,45 +94,65 @@ struct DetailPage {
       Scroll() {
         Column() {
           // 财务管理应用顶部模块
-          FinanceHeader()
+          FinanceHeader({
+            userName: this.currentAccount?.username,
+            income: this.income,
+            expenses: this.expenses
+          })
 
           // 当日交易记录
           Column() {
-            // 日期标题
-            Row() {
-              Text(this.currentDate)
-                .fontSize(16)
-                .fontColor('#999999')
-                .fontWeight(500)
-
-              Blank()
-
-              Text(`收入:${this.income}`)
-                .fontSize(14)
-                .fontColor('#999999')
-            }
-            .width('100%')
-            .padding(16)
-
             // 交易列表
             Flex({ direction: FlexDirection.Column }) {
-              ForEach(this.transactions, (item: Transaction) => {
+              ForEach(this.transactions, (item: AccountingRecord) => {
+                // 日期标题
+                Row() {
+                  Text(this.currentDate)
+                    .fontSize(16)
+                    .fontColor('#999999')
+                    .fontWeight(500)
+
+                  Blank()
+
+                  Text(`${item.type === 'expense' ? '支出' : '收入'}:${item.amount}`)
+                    .fontSize(14)
+                    .fontColor('#999999')
+                }
+                .width('100%')
+                .padding(16)
+
                 Row() {
                   Row() {
                     Row() {
-                      Image($r(item.icon))
-                        .width(24)
-                        .height(24)
+                      Text(item.selectedIcon)
+                        .fontFamily('myFont')
+                        .fontSize(20)
+                        .fontColor('#333333')
                     }
+                    .width(32)
+                    .height(32)
+                    .justifyContent(FlexAlign.Center)
+                    .backgroundColor('#FFD700')
+                    .borderRadius('50%')
                   }
                   .padding(16)
+                  .onClick(() => {
+                    // 跳转记账页面
+                    router.replaceUrl({
+                      url: 'pages/account',
+                      params: {
+                        currentCategory: item.category,
+                        currentIcon: item.selectedIcon,
+                      }
+                    });
+                  })
 
                   Row() {
                     Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
-                      Text(item.type)
+                      Text(item.category)
                         .fontSize(16)
 
-                      Text(`${item.amount}`)
+                      Text(`${item.type === 'expense' ? '-' : '+'}${item.amount}`)
                         .fontSize(16)
                         .fontColor('#333333')
                     }

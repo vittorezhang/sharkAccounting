@@ -3,9 +3,10 @@ import { promptAction, router } from "@kit.ArkUI";
 
 @Component
 export default struct FinanceHeader {
+  @Prop userName: string = '';
+  @Prop income: number = 0;
+  @Prop expenses: number = 0;
   @State currentYear: string = '2025年';
-  @State income: number = 198;
-  @State expenses: number = 0;
   private actionBarList: actionBarItem[] = [
     { name: '账单', icon: 'app.media.detail_bill' },
     { name: '预算', icon: 'app.media.detail_budget' },
@@ -30,7 +31,7 @@ export default struct FinanceHeader {
 
               // 月份选择
               Row() {
-                Text('06')
+                Text('07')
                   .fontSize(24)
                   .fontColor('#333333')
                 Row() {
@@ -119,7 +120,14 @@ export default struct FinanceHeader {
               .onClick(async () => {
                 if (index == 0) {
                   // 跳转账单页面
-                  return router.pushUrl({ url: 'pageViews/sharkBillPage' });
+                  return router.pushUrl({
+                    url: 'pageViews/sharkBillPage',
+                    params: {
+                      userName: this.userName,
+                      income: this.income,
+                      expenses: this.expenses
+                    }
+                  });
                 }
                 promptAction.showToast({ message: `${item.name}待开发` })
               })

@@ -43,7 +43,7 @@ struct MePage {
   ]
 
   aboutToAppear() {
-    // 从StorageUtil加载当前账户（完全匹配图片中的数据显示）
+    // 从StorageUtil加载当前账户
     StorageUtil.getCurrentAccount().then(account => {
       console.log('页面我的account', JSON.stringify(account))
       this.currentAccount = account;

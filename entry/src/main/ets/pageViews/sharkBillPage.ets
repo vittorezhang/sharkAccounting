@@ -1,17 +1,44 @@
-import HorizontalBarChart from '../components/HorizontalBarChart';
+import { router } from "@kit.ArkUI";
+
+interface RouteParams {
+  userName: string;
+  income?: string;
+  expenses?: string;
+}
 
 @Entry
 @Component
 struct SharkBillPage {
   // 用户信息区
-  @State userName: string = 'test1';
-  @State usageDays: number = 2;
-  @State currentMonth: string = '6月账单';
+  @State userName: string = '';
+  @State usageDays: number = 17;
+  @State currentMonth: string = '7月账单';
   // 收入&支出区
-  @State currentBalance: number = 198.00;
-  @State lastMonthBalance: number = 0.00;
-  @State income: number = 198.00;
-  @State expenses: number = 0.00;
+  @State currentBalance: number = 0;
+  @State lastMonthBalance: number = 0;
+  @State income: number = 0;
+  @State expenses: number = 0;
+  @State maxValue: number = 200;
+  @State incomeWidth: number = 0;
+  @State expensesWidth: number = 0;
+
+  onPageShow() {
+    const params = router.getParams() as RouteParams;
+    if (params.userName) {
+      this.userName = params.userName;
+      this.income = Number(params.income);
+      this.expenses = Number(params.expenses);
+      // 初始化动画（从左到右展开）
+      animateTo({
+        duration: 800,
+        curve: Curve.EaseOut
+      }, () => {
+        this.incomeWidth = (Number(this.income) / this.maxValue) * 100;
+        this.expensesWidth = (Number(this.expenses) / this.maxValue) * 100;
+        this.currentBalance = Number(this.income) - Number(this.expenses)
+      })
+    }
+  }
 
   build() {
     // 用户信息区
@@ -92,17 +119,93 @@ struct SharkBillPage {
         }
         .padding({ top: 16, bottom: 16 })
 
-        // 在页面中嵌入组件
+        // 横向柱状图
         Column() {
-          HorizontalBarChart()
-        }
+          // 支出柱状图
+          Row() {
+            // 标签文字
+            Text('支出')
+              .fontSize(14)
+              .fontColor('#666666')
+              .width(40)
 
-        // 动态更新数据
-        // Button('更新数据')
-        //   .onClick(() => {
-        //     this.income = 250;
-        //     this.expenses = 50;
-        //   })
+            // 柱状图容器（确保左对齐）
+            Column() {
+              Stack() {
+                // 灰色背景（全宽）
+                Column()
+                  .width('100%')
+                  .height(12)
+                  .backgroundColor('#F0F0F0')
+                  .borderRadius(6)
+
+                // 动态黄色进度条（从左向右增长）
+                Row() {
+                  Column()
+                    .width(`${this.expensesWidth}%`)
+                    .height(12)
+                    .backgroundColor('#FFD700')
+                    .borderRadius(6)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Start) // 关键：确保从左开始
+              }
+            }
+            .layoutWeight(1)
+            .height(12)
+
+            // 金额显示
+            Text(`${this.expenses.toFixed(2)}`)
+              .fontSize(14)
+              .fontColor('#666666')
+              .margin({ left: 8 })
+          }
+          .padding({ top: 8, bottom: 8 })
+          .width('100%')
+
+          // 收入柱状图
+          Row() {
+            // 标签文字
+            Text('收入')
+              .fontSize(14)
+              .fontColor('#666666')
+              .width(40)
+
+            // 柱状图容器
+            Column() {
+              Stack() {
+                // 灰色背景
+                Column()
+                  .width('100%')
+                  .height(12)
+                  .backgroundColor('#F0F0F0')
+                  .borderRadius(6)
+
+                // 动态黄色进度条（从左向右增长）
+                Row() {
+                  Column()
+                    .width(`${this.incomeWidth}%`)
+                    .height(12)
+                    .backgroundColor('#FFD700')
+                    .borderRadius(6)
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Start) // 关键：确保从左开始
+              }
+            }
+            .layoutWeight(1)
+            .height(12)
+
+            // 金额显示（加粗黑色）
+            Text(`${this.income.toFixed(2)}`)
+              .fontSize(14)
+              .fontColor('#333333')
+              .fontWeight(FontWeight.Medium)
+              .margin({ left: 8 })
+          }
+          .padding({ top: 8, bottom: 8 })
+          .width('100%')
+        }
       }
       .padding(16)
       .backgroundColor('#FFFFFF')

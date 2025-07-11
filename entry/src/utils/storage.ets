@@ -1,6 +1,7 @@
 import { preferences } from '@kit.ArkData';
-import { AccountList, AuthToken } from '../main/ets/viewModel/commonFunction';
+import { AccountingRecord, AccountList, AuthToken } from '../main/ets/viewModel/commonFunction';
 import { Base64Util } from './Base64Util';
+import { router } from '@kit.ArkUI';
 
 interface GeneratedTypeLiteralInterface {
   exp?: number;
@@ -10,6 +11,67 @@ interface GeneratedTypeLiteralInterface {
 export class StorageUtil {
   private static readonly PREFERENCES_NAME = 'my_app_preferences';
   private static readonly ACCOUNT_LIST_KEY = 'account_list';
+  private static readonly CURRENT_ACCOUNT = 'current_account';
+  private static readonly ACCOUNTING_RECORDS = (accountId: string) => `accounting_records_${accountId}`;
+  private static readonly CATEGORIES = (accountId: string) => `categories_${accountId}`;
+
+  // -------------------记账数据 start----------------------
+
+  //  保存记账记录
+  public static async saveAccountingRecord(record: AccountingRecord): Promise<void> {
+    console.log('记账了吗', JSON.stringify(record))
+    const pref = await StorageUtil.getPreferences();
+    const value = await pref.get(StorageUtil.ACCOUNT_LIST_KEY, '');
+    const parsed = JSON.parse(value.toString()) as AccountList;
+    console.log('parsed', JSON.stringify(parsed))
+    // 更新或新增数据
+    if (!parsed.expenseOrIncomeData) {
+      return
+    }
+    const existingIndex = parsed.expenseOrIncomeData.findIndex(a => a.category === record.category);
+    if (existingIndex >= 0) {
+      parsed.expenseOrIncomeData[existingIndex] = record;
+    } else {
+      parsed.expenseOrIncomeData.push(record);
+    }
+
+
+    const saveData: AccountList = {
+      currentAccountId: parsed.currentAccountId,
+      accounts: parsed.accounts.map(account => {
+        const savedAccount: AuthToken = {
+          id: account.id,
+          username: account.username,
+          password: account.password,
+          gender: account.gender,
+          token: account.token,
+          tokenExpire: account.tokenExpire,
+          timestamp: account.timestamp,
+        };
+        return savedAccount;
+      }),
+      expenseOrIncomeData: parsed.expenseOrIncomeData
+    };
+
+    await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(saveData));
+    await pref.flush();
+
+  }
+
+  // 获取记账记录
+  public static async getAccountingRecords(category: string): Promise<AccountingRecord | null> {
+    const pref = await StorageUtil.getPreferences();
+    const value = await pref.get(StorageUtil.ACCOUNT_LIST_KEY, '');
+    const parsed = JSON.parse(value.toString()) as AccountList;
+    console.log('获取记账记录parsed', JSON.stringify(parsed))
+    if(!parsed.expenseOrIncomeData){
+      return null
+    }
+    return parsed.expenseOrIncomeData.find(a => a.category === category) || null;
+  }
+
+  // -------------------记账数据 end------------------
+
 
   // -------------------添加token 时效start------------------
   private static readonly TOKEN_EXPIRE_MS = 120 * 60 * 1000; // 120分钟
@@ -119,7 +181,8 @@ export class StorageUtil {
           timestamp: account.timestamp
         };
         return savedAccount;
-      })
+      }),
+      expenseOrIncomeData: accountList.expenseOrIncomeData
     };
 
     await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(saveData));
@@ -134,7 +197,8 @@ export class StorageUtil {
     // 类型安全解析
     const defaultList: AccountList = {
       currentAccountId: '',
-      accounts: []
+      accounts: [],
+      expenseOrIncomeData: [],
     };
 
     if (!value) {
@@ -145,7 +209,8 @@ export class StorageUtil {
       const parsed = JSON.parse(value.toString()) as AccountList;
       return {
         currentAccountId: parsed.currentAccountId || '',
-        accounts: parsed.accounts || []
+        accounts: parsed.accounts || [],
+        expenseOrIncomeData: parsed.expenseOrIncomeData || []
       };
     } catch (e) {
       console.error('解析账户列表失败:', e);

@@ -2,10 +2,13 @@ import font from '@ohos.font';
 import { promptAction, router } from '@kit.ArkUI'
 import { MemoryCache } from '../../../utils/MemoryCache';
 import TabBar from '../components/TabBar'
+import { AccountData, AccountingRecord, AuthToken } from '../viewModel/commonFunction';
+import { StorageUtil } from '../../../utils/storage';
 
 interface Category {
   name: string;
   icon: string;
+  selectedIcon: string;
 }
 
 interface GeneratedTypeLiteralInterface_1 {
@@ -27,10 +30,16 @@ interface GeneratedTypeLiteralInterface_2 {
   operator: '+' | '-' | '×' | '';
 }
 
+interface RouteParams {
+  currentCategory: string;
+  currentIcon: string;
+}
+
 @Entry
 @Component
 struct AccountPage {
   @State private currentIndex: number = 2
+  @State currentAccount: AuthToken | null = null;
   @State listAnimation: GeneratedTypeLiteralInterface_1 = {
     translateX: 0,
     // opacity: 1,
@@ -39,6 +48,7 @@ struct AccountPage {
   @State private animating: boolean = false;
   @State translateY: number = 1000 // 初始在屏幕外
   @State selectedTab: string = '支出'
+  @State selectedIcon: string = ''
   @State selectedCategory: string = ''
   @State amount: string = '0.00'
   @State showKeyboard: boolean = false
@@ -77,49 +87,49 @@ struct AccountPage {
   ];
   // 支出的分类数据
   @State expensesCategories: Category[] = [
-    { name: '餐饮', icon: '\ue8a4' },
-    { name: '购物', icon: '\ue899' },
-    { name: '日用', icon: '\ue604' },
-    { name: '交通', icon: '\ue61e' },
-    { name: '蔬菜', icon: '\ue713' },
-    { name: '水果', icon: '\ue631' },
-    { name: '零食', icon: '\ue625' },
-    { name: '运动', icon: '\ue69b' },
-    { name: '娱乐', icon: '\ue639' },
-    { name: '通讯', icon: '\ue632' },
-    { name: '服饰', icon: '\ue60d' },
-    { name: '美容', icon: '\ue657' },
-    { name: '住房', icon: '\ue63b' },
-    { name: '居家', icon: '\ue61b' },
-    { name: '孩子', icon: '\ue84e' },
-    { name: '长辈', icon: '\ue654' },
-    { name: '社交', icon: '\ue615' },
-    { name: '旅行', icon: '\ue655' },
-    { name: '烟酒', icon: '\ue60f' },
-    { name: '数码', icon: '\ue611' },
-    { name: '汽车', icon: '\ue65d' },
-    { name: '医疗', icon: '\ue646' },
-    { name: '书籍', icon: '\ue606' },
-    { name: '学习', icon: '\ue763' },
-    { name: '宠物', icon: '\ue90d' },
-    { name: '礼金', icon: '\ue651' },
-    { name: '礼物', icon: '\ue600' },
-    { name: '办公', icon: '\ue624' },
-    { name: '维修', icon: '\ue633' },
-    { name: '捐赠', icon: '\ue634' },
-    { name: '彩票', icon: '\ue613' },
-    { name: '亲友', icon: '\ue61d' },
-    { name: '快递', icon: '\ue696' },
-    { name: '设置', icon: '\ue605' }
+    { name: '餐饮', icon: '\ue8a4', selectedIcon: 'e8a4' },
+    { name: '购物', icon: '\ue899', selectedIcon: 'e899' },
+    { name: '日用', icon: '\ue604', selectedIcon: 'e604' },
+    { name: '交通', icon: '\ue61e', selectedIcon: 'e61e' },
+    { name: '蔬菜', icon: '\ue713', selectedIcon: 'e713' },
+    { name: '水果', icon: '\ue631', selectedIcon: 'e631' },
+    { name: '零食', icon: '\ue625', selectedIcon: 'e625' },
+    { name: '运动', icon: '\ue69b', selectedIcon: 'e69b' },
+    { name: '娱乐', icon: '\ue639', selectedIcon: 'e639' },
+    { name: '通讯', icon: '\ue632', selectedIcon: 'e632' },
+    { name: '服饰', icon: '\ue60d', selectedIcon: 'e60d' },
+    { name: '美容', icon: '\ue657', selectedIcon: 'e657' },
+    { name: '住房', icon: '\ue63b', selectedIcon: 'e63b' },
+    { name: '居家', icon: '\ue61b', selectedIcon: 'e61b' },
+    { name: '孩子', icon: '\ue84e', selectedIcon: 'e84e' },
+    { name: '长辈', icon: '\ue654', selectedIcon: 'e654' },
+    { name: '社交', icon: '\ue615', selectedIcon: 'e615' },
+    { name: '旅行', icon: '\ue655', selectedIcon: 'e655' },
+    { name: '烟酒', icon: '\ue60f', selectedIcon: 'e60f' },
+    { name: '数码', icon: '\ue611', selectedIcon: 'e611' },
+    { name: '汽车', icon: '\ue65d', selectedIcon: 'e65d' },
+    { name: '医疗', icon: '\ue646', selectedIcon: 'e646' },
+    { name: '书籍', icon: '\ue606', selectedIcon: 'e606' },
+    { name: '学习', icon: '\ue763', selectedIcon: 'e763' },
+    { name: '宠物', icon: '\ue90d', selectedIcon: 'e90d' },
+    { name: '礼金', icon: '\ue651', selectedIcon: 'e651' },
+    { name: '礼物', icon: '\ue600', selectedIcon: 'e600' },
+    { name: '办公', icon: '\ue624', selectedIcon: 'e624' },
+    { name: '维修', icon: '\ue633', selectedIcon: 'e633' },
+    { name: '捐赠', icon: '\ue634', selectedIcon: 'e634' },
+    { name: '彩票', icon: '\ue613', selectedIcon: 'e613' },
+    { name: '亲友', icon: '\ue61d', selectedIcon: 'e61d' },
+    { name: '快递', icon: '\ue696', selectedIcon: 'e696' },
+    { name: '设置', icon: '\ue605', selectedIcon: 'e605' }
   ]
   // 收入的分类数据
   @State incomeCategories: Category[] = [
-    { name: '工资', icon: '\ue764' },
-    { name: '兼职', icon: '\ue61f' },
-    { name: '理财', icon: '\ue623' },
-    { name: '礼金', icon: '\ue792' },
-    { name: '其它', icon: '\ue65a' },
-    { name: '设置', icon: '\ue605' }
+    { name: '工资', icon: '\ue764', selectedIcon: 'e764' },
+    { name: '兼职', icon: '\ue61f', selectedIcon: 'e61f' },
+    { name: '理财', icon: '\ue623', selectedIcon: 'e623' },
+    { name: '礼金', icon: '\ue792', selectedIcon: 'e792' },
+    { name: '其它', icon: '\ue65a', selectedIcon: 'e65a' },
+    { name: '设置', icon: '\ue605', selectedIcon: 'e605' }
   ]
 
   onPageShow(): void {
@@ -128,8 +138,23 @@ struct AccountPage {
       familyName: 'myFont',
       familySrc: '/fonts/iconfont.ttf'
     })
-    const cached = MemoryCache.get('cache_route');
-    console.log('--cached--', JSON.stringify(cached))
+    // 明细页 传过来的参数
+    const params = router.getParams() as RouteParams;
+    if (params.currentCategory) {
+      this.selectedCategory = params.currentCategory;
+      // 预留TODO
+      // this.selectCategory({
+      //   name: params.currentCategory,
+      //   icon: params.currentIcon,
+      //   selectedIcon: params.currentIcon,
+      // });
+      // this.showKeyboard = true;
+    }
+    // 从StorageUtil加载当前账户
+    StorageUtil.getCurrentAccount().then(account => {
+      console.log('页面记账的account', JSON.stringify(account))
+      this.currentAccount = account;
+    });
   }
 
   onPageHide(): void {
@@ -195,12 +220,13 @@ struct AccountPage {
     });
   }
 
-  private selectCategory(name: string) {
+  private selectCategory(item: Category) {
     animateTo({
       duration: 150,
       curve: Curve.EaseInOut
     }, () => {
-      this.selectedCategory = name
+      this.selectedIcon = item.icon
+      this.selectedCategory = item.name
     })
   }
 
@@ -381,6 +407,9 @@ struct AccountPage {
       case 'x': // 清除操作
         this.clearCalculation();
         break;
+      case '完成':
+        this.finishAccount();
+        break;
       case '今天':
         // 原有日期处理
         break;
@@ -441,6 +470,35 @@ struct AccountPage {
     this.showKeyboard = true; // 保持键盘打开
   }
 
+  private finishAccount() {
+    if (!this.currentAccount?.id) {
+      return;
+    }
+    // 1. 获取当前数据
+    const currentAmount = parseFloat(this.amount.replace(/[^0-9.]/g, ''));
+    const selectedCategory = this.selectedCategory || '其他'; // 从界面获取选中分类
+    console.log('this.selectedIcon', this.selectedIcon)
+    // 2. 创建新记录
+    const newRecord: AccountingRecord = {
+      currentAccountId: this.currentAccount.id,
+      id: this.currentAccount.id,
+      accountId: this.currentAccount.id,
+      type: this.selectedTab === '支出' ? 'expense' : 'income',
+      selectedIcon: this.selectedIcon,
+      category: selectedCategory,
+      amount: currentAmount,
+      remark: this.note || undefined, // 从备注输入框获取
+      createTime: new Date().toISOString()
+    };
+    // 保存记账数据
+    StorageUtil.saveAccountingRecord(newRecord);
+
+    setTimeout(() => {
+      // 跳转明细页面
+      router.replaceUrl({ url: 'pages/detail' });
+    }, 1000)
+  }
+
   private processAmountInput(key: string) {
     // 重置计算状态时的输入
     if (this.calculation.operator && this.amount === '0.00') {
@@ -465,20 +523,6 @@ struct AccountPage {
     this.amount = this.amount === '0.00' ?
       key :
       this.amount.replace(/[^0-9.]/g, '') + key;
-  }
-
-  // 点击 +
-  private submitCalculator() {
-    console.log(`计算数值: ${this.selectedCategory} ¥${this.amount}}`);
-    this.note = this.amount + this.amount
-    this.showKeyboard = false;
-  }
-
-  // 点击完成
-  private submitExpense() {
-    console.log(`记录支出: ${this.selectedCategory} ¥${this.amount} 备注: ${this.note}`);
-    this.showKeyboard = false;
-    // 实际项目这里调用API提交数据
   }
 
   build() {
@@ -540,7 +584,7 @@ struct AccountPage {
                 }
               }
               .onClick(() => {
-                this.selectCategory(item.name);
+                this.selectCategory(item);
                 this.showKeyboard = true;
               })
             }
