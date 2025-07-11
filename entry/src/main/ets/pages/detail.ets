@@ -50,7 +50,7 @@ struct DetailPage {
     console.log('这是当前登录账户的记账数据', JSON.stringify(currentAccountData));
     this.transactions = currentAccountData;
     // 筛选收入累计、支出累计
-    result?.forEach((mItem: AccountingRecord) => {
+    this.transactions?.forEach((mItem: AccountingRecord) => {
       if (mItem.type === 'income') {
         this.income += mItem?.amount || 0;
       } else {
