@@ -65,6 +65,9 @@ struct DetailPage {
     if (!this.currentAccount?.id) {
       return;
     }
+    //初始化清空【 收入、支出】
+    this.income = 0
+    this.expenses = 0
     // 1. 获取当前数据
     const selectedCategory = this.currentEditCategory || item.category || '其他';
     // 2. 创建新记录
@@ -124,7 +127,7 @@ struct DetailPage {
           })
       }
       .position({ x: this.editPosition.x, y: this.editPosition.y })
-      .zIndex(999)
+      .zIndex(10)
     }
   }
 
@@ -317,9 +320,6 @@ struct DetailPage {
     .backgroundColor('#F5F5F5')
     .onClick(() => {
       if (this.isEditing) {
-        //初始化清空【 收入、支出】
-        this.income = 0
-        this.expenses = 0
         this.isEditing = false; // 点击其他区域关闭编辑
       }
     })
