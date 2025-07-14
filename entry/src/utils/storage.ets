@@ -256,16 +256,23 @@ export class StorageUtil {
       const pref = await StorageUtil.getPreferences();
       const accountList = await StorageUtil.getAccountList();
 
-      // 类型安全过滤
+      // 类型安全过滤 【账户数据】
       const updatedAccounts = accountList.accounts.filter((acc: AuthToken) => acc.id !== accountId);
+      let updatedExpenseOrIncomeData: AccountingRecord[] = []
+      // 记账数据
+      if (accountList.expenseOrIncomeData) {
+        updatedExpenseOrIncomeData =
+          accountList.expenseOrIncomeData.filter((acc: AccountingRecord) => acc.id !== accountId);
 
+      }
       // 处理当前账户
       const updatedCurrentId = accountList.currentAccountId === accountId ? '' : accountList.currentAccountId;
 
       // 类型安全的保存数据
       const updatedList: AccountList = {
         currentAccountId: updatedCurrentId,
-        accounts: updatedAccounts
+        accounts: updatedAccounts,
+        expenseOrIncomeData: updatedExpenseOrIncomeData,
       };
 
       await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(updatedList));
