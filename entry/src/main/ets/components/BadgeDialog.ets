@@ -82,5 +82,6 @@ export default struct BadgeDialog {
     .height('100%')
     .backgroundColor('rgba(0,0,0,0.5)')
     .position({ x: 0, y: 0 })
+    .zIndex(99999)
   }
 }
