@@ -101,8 +101,8 @@ struct DetailPage {
 
     // 获取点击位置（适配不同设备）
     this.editPosition = {
-      x: event.offsetX + 50,
-      y: event.offsetY + 15 // 下移30px避免遮挡
+      x: event.offsetX + 24,
+      y: event.offsetY - 6
     };
   }
 
@@ -112,8 +112,8 @@ struct DetailPage {
     if (this.isEditing) {
       Column() {
         TextInput({ text: this.currentEditCategory })
-          .width('60%')
-          .height(40)
+          .width('70%')
+          .height(34)
           .backgroundColor('#FFFFFF')
           .border({ width: 1, color: '#FFD700' })
           .onChange((value) => {
@@ -201,109 +201,104 @@ struct DetailPage {
       .width('100%')
       .backgroundColor('#FFD700')
 
+      // 财务管理应用顶部模块
+      FinanceHeader({
+        userName: this.currentAccount?.username,
+        income: this.income,
+        expenses: this.expenses
+      })
+        .zIndex(99)
+
       // 2. 主内容区
       Scroll() {
         Column() {
-          // 财务管理应用顶部模块
-          FinanceHeader({
-            userName: this.currentAccount?.username,
-            income: this.income,
-            expenses: this.expenses
-          })
-
-          // 当日交易记录
-          Column() {
-            // 交易列表
-            Flex({ direction: FlexDirection.Column }) {
-              ForEach(this.transactions, (item: AccountingRecord) => {
-                // 日期标题
+          ForEach(this.transactions, (item: AccountingRecord) => {
+            Column({ space: 8 }) {
+              Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 Row() {
                   Text(this.currentDate)
                     .fontSize(16)
                     .fontColor('#999999')
                     .fontWeight(500)
+                }
 
-                  Blank()
-
+                Row() {
                   Text(`${item.type === 'expense' ? '支出' : '收入'}:${item.amount}`)
                     .fontSize(14)
                     .fontColor('#999999')
                 }
-                .width('100%')
-                .padding(16)
+              }
+              .height(24)
+
+              Flex({ justifyContent: FlexAlign.SpaceBetween }) {
+                Row() {
+                  Text(item.selectedIcon)
+                    .fontFamily('myFont')
+                    .fontSize(20)
+                    .fontColor('#333333')
+                }
+                .backgroundColor('#FFD700')
+                .borderRadius('50%')
+                .onClick(() => {
+                  // 跳转记账页面
+                  router.replaceUrl({
+                    url: 'pages/account',
+                    params: {
+                      currentCategoryId: item.id,
+                      currentCategory: item.category,
+                      currentIcon: item.selectedIcon,
+                    }
+                  });
+                })
 
                 Row() {
-                  Row() {
-                    Row() {
-                      Text(item.selectedIcon)
-                        .fontFamily('myFont')
-                        .fontSize(20)
-                        .fontColor('#333333')
-                    }
-                    .width(32)
-                    .height(32)
-                    .justifyContent(FlexAlign.Center)
-                    .backgroundColor('#FFD700')
-                    .borderRadius('50%')
-                  }
-                  .padding(16)
-                  .onClick(() => {
-                    // 跳转记账页面
-                    router.replaceUrl({
-                      url: 'pages/account',
-                      params: {
-                        currentCategoryId: item.id,
-                        currentCategory: item.category,
-                        currentIcon: item.selectedIcon,
-                      }
-                    });
-                  })
-
-                  Row() {
-                    Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
-                      Text(item.category)
-                        .fontSize(16)
-
-                      Text(`${item.type === 'expense' ? '-' : '+'}${item.amount}`)
-                        .fontSize(16)
-                        .fontColor('#333333')
-                    }
-                    .width('82%')
-                  }
-                  .border({
-                    width: {
-                      bottom: 1
-                    },
-                    color: '#F5F5F5'
-                  })
-                  .padding(16)
-                  .gesture(
-                    LongPressGesture({ repeat: false })
-                      .onAction((event: GestureEvent) => {
-                        this.handleLongPress(event, item);
-                      })
-                  )
-
-                  if (this.currentEditCategoryId === item.id && this.currentEditCreateTime === item.createTime) {
-                    // 编辑框（放在Stack最上层）
-                    this.editCategoryInput(item)
-                  }
+                  Text(item.category)
+                    .fontSize(16)
                 }
-                .width('100%')
-                .borderRadius(8)
-                .backgroundColor('#FFFFFF')
-              })
+                .width('70%')
+                .gesture(
+                  LongPressGesture({ repeat: false })
+                    .onAction((event: GestureEvent) => {
+                      this.handleLongPress(event, item);
+                    })
+                )
+
+                if (this.currentEditCategoryId === item.id && this.currentEditCreateTime === item.createTime) {
+                  // 编辑框（放在Stack最上层）
+                  this.editCategoryInput(item)
+                }
+
+
+                Row() {
+                  Text(`${item.type === 'expense' ? '-' : '+'}${item.amount}`)
+                    .fontSize(16)
+                    .fontColor('#333333')
+                }
+              }
+              .height(24)
+              .margin({ top: 4, bottom: 4 })
             }
             .width('100%')
-          }
-          .width('100%')
-          .margin({ top: 64 })
-          // .layoutWeight(1)
-          .backgroundColor('#ffffff')
+            .padding({
+              left: 16,
+              right: 16,
+              top: 8,
+              bottom: 8
+            }) // 调整内边距
+            .backgroundColor('#FFFFFF')
+            .margin({ bottom: 1 }) // 添加底部边距
+            .borderRadius(8) // 添加圆角
+          })
         }
-        .margin({ bottom: 56 }) // 添加底部边距，为TabBar留出空间
+        .width('100%')
+        .margin({ top: 64, bottom: 56 })
       }
+      .height('100%') // 关键修改：设置固定高度
+      .scrollable(ScrollDirection.Vertical)
+      .scrollBar(BarState.Auto)
       .layoutWeight(1)
+      .align(Alignment.Top) // 确保填充剩余空间
+
 
       // 3. 底部TabBar
       TabBar({ currentIndex: $currentIndex })
