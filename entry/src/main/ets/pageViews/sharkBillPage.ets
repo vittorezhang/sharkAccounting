@@ -18,7 +18,7 @@ struct SharkBillPage {
   @State lastMonthBalance: number = 0;
   @State income: number = 0;
   @State expenses: number = 0;
-  @State maxValue: number = 200;
+  @State maxValue: number = 0;
   @State incomeWidth: number = 0;
   @State expensesWidth: number = 0;
 
@@ -28,6 +28,7 @@ struct SharkBillPage {
       this.userName = params.userName;
       this.income = Number(params.income);
       this.expenses = Number(params.expenses);
+      this.maxValue = Number(params.income);
       // 初始化动画（从左到右展开）
       animateTo({
         duration: 800,
