@@ -32,6 +32,7 @@ struct DetailPage {
   @State editPosition: editPositionItem = { x: 0, y: 0 };
   @State currentEditCategory: string = '';
   @State currentEditCategoryId: string = '';
+  @State currentEditCreateTime: string = '';
 
   // 获取记账数据
   private async getCategory(accountId: string) {
@@ -76,7 +77,8 @@ struct DetailPage {
       category: selectedCategory,
       amount: item.amount,
       remark: item.remark || undefined, // 从备注输入框获取
-      createTime: new Date().toISOString()
+      createTime: (item.id === this.currentEditCategoryId && item.createTime === this.currentEditCreateTime) ?
+      item.createTime : new Date().toISOString()
     };
     // 保存记账数据
     StorageUtil.saveAccountingRecord(newRecord);
@@ -94,6 +96,7 @@ struct DetailPage {
   private handleLongPress(event: GestureEvent, item: AccountingRecord) {
     this.isEditing = true;
     this.currentEditCategoryId = item.id;
+    this.currentEditCreateTime = item.createTime;
     this.currentEditCategory = item.category;
 
     // 获取点击位置（适配不同设备）
@@ -281,7 +284,7 @@ struct DetailPage {
                       })
                   )
 
-                  if (this.currentEditCategoryId === item.id) {
+                  if (this.currentEditCategoryId === item.id && this.currentEditCreateTime === item.createTime) {
                     // 编辑框（放在Stack最上层）
                     this.editCategoryInput(item)
                   }
@@ -295,7 +298,7 @@ struct DetailPage {
           }
           .width('100%')
           .margin({ top: 64 })
-          .layoutWeight(1)
+          // .layoutWeight(1)
           .backgroundColor('#ffffff')
         }
         .margin({ bottom: 56 }) // 添加底部边距，为TabBar留出空间

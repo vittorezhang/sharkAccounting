@@ -23,7 +23,9 @@ export class StorageUtil {
     if (!parsed.expenseOrIncomeData) {
       return
     }
-    const existingIndex = parsed.expenseOrIncomeData.findIndex(a => a.id === record.id);
+    const existingIndex = parsed.expenseOrIncomeData.findIndex((a) => {
+      return (a.createTime === record.createTime && a.id === record.id);
+    });
     if (existingIndex >= 0) {
       parsed.expenseOrIncomeData[existingIndex] = record;
     } else {
@@ -65,7 +67,7 @@ export class StorageUtil {
   }
 
   // 获取记账数据【当前账户】
-  public static async getCurrentAccountingRecord(accountId:string) {
+  public static async getCurrentAccountingRecord(accountId: string) {
     const accountList = await StorageUtil.getAccountList();
     if (!accountList?.expenseOrIncomeData) {
       return null;
