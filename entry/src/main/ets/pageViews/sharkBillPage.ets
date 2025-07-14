@@ -29,13 +29,18 @@ struct SharkBillPage {
       this.income = Number(params.income);
       this.expenses = Number(params.expenses);
       this.maxValue = Number(params.income);
+
       // 初始化动画（从左到右展开）
       animateTo({
         duration: 800,
         curve: Curve.EaseOut
       }, () => {
         this.incomeWidth = (Number(this.income) / this.maxValue) * 100;
-        this.expensesWidth = (Number(this.expenses) / this.maxValue) * 100;
+        if(Number(params.expenses) > Number(params.income)){
+          this.expensesWidth = (Number(this.income) / this.maxValue) * 100;
+        }else {
+          this.expensesWidth = (Number(this.expenses) / this.maxValue) * 100;
+        }
         this.currentBalance = Number(this.income) - Number(this.expenses)
       })
     }
