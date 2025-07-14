@@ -26,9 +26,10 @@ export interface textItem {
   isConfirm?: boolean;
 }
 
-interface GeneratedTypeLiteralInterface_2 {
+interface calculationItem {
   firstOperand: string;
   operator: '+' | '-' | '×' | '';
+  lastResult?: string; // 新增字段记录上次结果
 }
 
 interface RouteParams {
@@ -56,9 +57,10 @@ struct AccountPage {
   @State amount: string = '0.00'
   @State showKeyboard: boolean = false
   @State note: string = ''
-  @State calculation: GeneratedTypeLiteralInterface_2 = {
+  @State calculation: calculationItem = {
     firstOperand: '',
-    operator: ''
+    operator: '',
+    lastResult: '', // 新增字段记录上次结果
   }
   private oneRowList: textItem[] = [
     { label: '7', icon: '' },
@@ -624,49 +626,66 @@ struct AccountPage {
   }
 
   private handleOperator(operator: '+' | '-' | '×') {
-    // 清除无效字符
     const cleanAmount = this.amount.replace(/[^0-9.]/g, '');
 
-    // 忽略无效操作
-    if (cleanAmount === '0.00' && !this.calculation.firstOperand) {
-      return;
+    // 首次运算符输入
+    if (!this.calculation.operator) {
+      this.calculation = {
+        firstOperand: cleanAmount,
+        operator,
+        lastResult: ''
+      };
+    }
+    // 连续运算符输入（如7+2+）
+    else {
+      const result = this.calculateIntermediate();
+      this.calculation = {
+        firstOperand: result.toString(),
+        operator,
+        lastResult: result.toString()
+      };
     }
 
-    // 自动完成上一个计算
-    if (this.calculation.operator && this.calculation.firstOperand) {
-      this.calculateResult();
-    }
-
-    this.calculation = {
-      firstOperand: cleanAmount,
-      operator
-    };
     this.amount = '0.00';
   }
 
-  private calculateResult() {
-    const first = parseFloat(this.calculation.firstOperand);
-    const second = parseFloat(this.amount.replace(/[^0-9.]/g, ''));
+  // 中间计算逻辑
+  private calculateIntermediate(): number {
+    const current = parseFloat(this.amount || '0');
+    const first = parseFloat(this.calculation.firstOperand || '0');
 
-    let result = 0;
     switch (this.calculation.operator) {
       case '+':
-        result = first + second;
-        break;
+        return first + current;
       case '-':
-        result = first - second;
-        break;
+        return first - current;
       case '×':
-        result = first * second;
-        break;
+        return first * current;
+      default:
+        return current;
+    }
+  }
+
+  // 最终计算逻辑
+  private calculateResult() {
+    let result = 0;
+
+    if (this.calculation.lastResult) {
+      // 处理连续运算（如7+2+3=）
+      const current = parseFloat(this.amount || '0');
+      result = parseFloat(this.calculation.lastResult) + current;
+    } else if (this.calculation.firstOperand) {
+      // 标准运算（如7+2=）
+      result = this.calculateIntermediate();
     }
 
-    // 格式化显示（保留两位小数，去除多余0）
+    // 格式化显示
     this.amount = result % 1 === 0 ?
     result.toString() :
-    result.toFixed(2).replace(/\.?0+$/, '');
+    result.toFixed(2);
 
-    this.calculation = { firstOperand: '', operator: '' };
+    // 重置状态
+    this.calculation = { firstOperand: '', operator: '', lastResult: '' };
   }
 
   private clearCalculation() {
