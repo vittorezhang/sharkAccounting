@@ -22,8 +22,6 @@ interface RouteParams {
 struct DetailPage {
   @State private currentIndex: number = 0
   @State currentAccount: AuthToken | null = null;
-  // @State currentDate: string = this.getFormattedDate();
-  @State currentTime: string = '';
   @State income: number = 0;
   @State expenses: number = 0;
   @State transactions: AccountingRecord[] = [];
@@ -33,6 +31,7 @@ struct DetailPage {
   @State isEditing: boolean = false;
   @State editPosition: editPositionItem = { x: 0, y: 0 };
   @State currentEditCategory: string = '';
+  @State currentEditRemark: string = '';
   @State currentEditCategoryId: string = '';
   @State currentEditCreateTime: string = '';
 
@@ -72,6 +71,7 @@ struct DetailPage {
     this.expenses = 0
     // 1. 获取当前数据
     const selectedCategory = this.currentEditCategory || item.category || '其他';
+    const selectedRemark = this.currentEditRemark || item.remark || undefined;
     // 2. 创建新记录
     const newRecord: AccountingRecord = {
       currentAccountId: this.currentAccount.id,
@@ -81,7 +81,7 @@ struct DetailPage {
       selectedIcon: item.selectedIcon,
       category: selectedCategory,
       amount: item.amount,
-      remark: item.remark || undefined, // 从备注输入框获取
+      remark: selectedRemark,
       createTime: (item.id === this.currentEditCategoryId && item.createTime === this.currentEditCreateTime) ?
       item.createTime : new Date().toISOString()
     };
@@ -103,7 +103,9 @@ struct DetailPage {
     this.currentEditCategoryId = item.id;
     this.currentEditCreateTime = item.createTime;
     this.currentEditCategory = item.category;
-
+    if (item?.remark) {
+      this.currentEditRemark = item.remark;
+    }
     // 获取点击位置（适配不同设备）
     this.editPosition = {
       x: event.offsetX + 24,
@@ -116,13 +118,14 @@ struct DetailPage {
   editCategoryInput(item: AccountingRecord) {
     if (this.isEditing) {
       Column() {
-        TextInput({ text: this.currentEditCategory })
+        TextInput({ text: this.currentEditRemark || this.currentEditCategory })
           .width('70%')
           .height(34)
           .backgroundColor('#FFFFFF')
           .border({ width: 1, color: '#FFD700' })
           .onChange((value) => {
             this.currentEditCategory = value;
+            this.currentEditRemark = value;
           })
           .onBlur(() => {
             this.saveCategory(item);
@@ -131,15 +134,6 @@ struct DetailPage {
       .position({ x: this.editPosition.x, y: this.editPosition.y })
       .zIndex(10)
     }
-  }
-
-  private getFormattedDate(): string {
-    const now = new Date();
-    const month = now.getMonth() + 1;
-    const day = now.getDate();
-    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-
-    return `${month}月${day}日 星期${weekdays[now.getDay()]}`;
   }
 
   async onPageShow() {
@@ -257,7 +251,7 @@ struct DetailPage {
                 })
 
                 Row() {
-                  Text(item.category)
+                  Text(item.remark || item.category)
                     .fontSize(16)
                 }
                 .width('70%')
