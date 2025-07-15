@@ -7,6 +7,105 @@ import { AuthToken } from '../viewModel/commonFunction';
 struct AccountSettingsPage {
   @State currentAccount: AuthToken | null = null;
 
+
+  // 构建信息项
+  @Builder
+  private buildInfoItem(label: string, value?: string, clickable?: boolean, isSet?: boolean) {
+    Column() {
+      Divider()
+        .strokeWidth(0.5)
+        .color('#F5F5F5')
+      Row() {
+        Text(label)
+          .fontSize(16)
+          .fontColor('#333333')
+          .layoutWeight(1)
+
+        Row() {
+          Text(value)
+            .fontSize(16)
+            .fontColor('#999999')
+            .margin({ right: 8 })
+
+          if (!isSet) {
+            Text('未设置')
+              .fontSize(14)
+              .fontColor('#F7812F')
+              .margin({ right: 4 })
+          }
+          if (clickable) {
+            Image($r('app.media.ic_arrow_right'))
+              .width(16)
+              .height(16)
+          }
+        }
+      }
+      .height(56)
+      .width('100%')
+      .padding({ left: 16, right: 16 })
+      .backgroundColor('#FFFFFF')
+      .margin({ top: label == '手机号' ? 12 : 0 })
+
+      Divider()
+        .strokeWidth(0.5)
+        .color('#F5F5F5')
+    }
+    .onClick(() => {
+      if (clickable) {
+        promptAction.showToast({ message: `${label}功能待开发` });
+      }
+    })
+  }
+
+  // 构建功能项
+  @Builder
+  private buildFunctionItem(label: string, withWarning: boolean, warningText?: string) {
+    Column() {
+      Divider()
+        .strokeWidth(0.5)
+        .color('#F5F5F5')
+
+      Row() {
+        Text(label)
+          .fontSize(16)
+          .fontColor(label.includes('注销') ? '#FF6B6B' : '#333333')
+          .layoutWeight(1)
+
+        Image($r('app.media.ic_arrow_right'))
+          .width(16)
+          .height(16)
+      }
+      .height(56)
+      .width('100%')
+      .padding({ left: 16, right: 16 })
+      .backgroundColor('#FFFFFF')
+      .margin({ top: label == '个人信息浏览及导出' ? 12 : 0 })
+
+      if (!withWarning) {
+        Divider()
+          .strokeWidth(0.5)
+          .color('#F5F5F5')
+      }
+      if (withWarning && warningText) {
+        Text(warningText)
+          .fontSize(12)
+          .fontColor('#999999')
+          .width('100%')
+          .textAlign(TextAlign.Start)
+          .padding({ left: 16, right: 16, bottom: 16 })
+          .backgroundColor('#FFFFFF')
+      }
+    }
+    .onClick(() => {
+      if (label.includes('注销')) {
+        // 注销账户
+        this.showClearAccountConfirm();
+      } else {
+        promptAction.showToast({ message: `${label}功能待开发` });
+      }
+    })
+  }
+
   // 注销账户
   private async handleClearAccount() {
     try {
@@ -49,7 +148,7 @@ struct AccountSettingsPage {
     if (!this.currentAccount) {
       return;
     }
-    // 更新账户Token（严格类型）
+    // 更新账户Token
     const updatedAccount: AuthToken = {
       id: this.currentAccount.id,
       username: this.currentAccount.username,
@@ -186,103 +285,5 @@ struct AccountSettingsPage {
     }
     .width('100%')
     .height('100%')
-  }
-
-  // 构建信息项
-  @Builder
-  private buildInfoItem(label: string, value?: string, clickable?: boolean, isSet?: boolean) {
-    Column() {
-      Divider()
-        .strokeWidth(0.5)
-        .color('#F5F5F5')
-      Row() {
-        Text(label)
-          .fontSize(16)
-          .fontColor('#333333')
-          .layoutWeight(1)
-
-        Row() {
-          Text(value)
-            .fontSize(16)
-            .fontColor('#999999')
-            .margin({ right: 8 })
-
-          if (!isSet) {
-            Text('未设置')
-              .fontSize(14)
-              .fontColor('#F7812F')
-              .margin({ right: 4 })
-          }
-          if (clickable) {
-            Image($r('app.media.ic_arrow_right'))
-              .width(16)
-              .height(16)
-          }
-        }
-      }
-      .height(56)
-      .width('100%')
-      .padding({ left: 16, right: 16 })
-      .backgroundColor('#FFFFFF')
-      .margin({ top: label == '手机号' ? 12 : 0 })
-
-      Divider()
-        .strokeWidth(0.5)
-        .color('#F5F5F5')
-    }
-    .onClick(() => {
-      if (clickable) {
-        promptAction.showToast({ message: `${label}功能待开发` });
-      }
-    })
-  }
-
-  // 构建功能项
-  @Builder
-  private buildFunctionItem(label: string, withWarning: boolean, warningText?: string) {
-    Column() {
-      Divider()
-        .strokeWidth(0.5)
-        .color('#F5F5F5')
-
-      Row() {
-        Text(label)
-          .fontSize(16)
-          .fontColor(label.includes('注销') ? '#FF6B6B' : '#333333')
-          .layoutWeight(1)
-
-        Image($r('app.media.ic_arrow_right'))
-          .width(16)
-          .height(16)
-      }
-      .height(56)
-      .width('100%')
-      .padding({ left: 16, right: 16 })
-      .backgroundColor('#FFFFFF')
-      .margin({ top: label == '个人信息浏览及导出' ? 12 : 0 })
-
-      if (!withWarning) {
-        Divider()
-          .strokeWidth(0.5)
-          .color('#F5F5F5')
-      }
-      if (withWarning && warningText) {
-        Text(warningText)
-          .fontSize(12)
-          .fontColor('#999999')
-          .width('100%')
-          .textAlign(TextAlign.Start)
-          .padding({ left: 16, right: 16, bottom: 16 })
-          .backgroundColor('#FFFFFF')
-      }
-    }
-    .onClick(() => {
-      if (label.includes('注销')) {
-        // 注销账户
-        this.showClearAccountConfirm();
-      } else {
-        promptAction.showToast({ message: `${label}功能待开发` });
-      }
-    })
   }
 }
