@@ -1,51 +1,26 @@
 import font from '@ohos.font';
-import { promptAction, router } from '@kit.ArkUI'
+import { router } from '@kit.ArkUI'
 import { MemoryCache } from '../../../utils/MemoryCache';
 import TabBar from '../components/TabBar'
-import { AccountData, AccountingRecord, AuthToken } from '../viewModel/commonFunction';
+import { AccountingRecord, AuthToken } from '../viewModel/commonFunction';
 import { StorageUtil } from '../../../utils/Storage';
-
-interface Category {
-  id: string;
-  name: string;
-  icon: string;
-  selectedIcon: string;
-}
-
-interface GeneratedTypeLiteralInterface_1 {
-  translateX: number;
-
-  // opacity: number;
-  direction: 'left' | 'right';
-}
-
-export interface textItem {
-  label: string;
-  icon: string;
-  isBlank?: boolean;
-  isConfirm?: boolean;
-}
-
-interface calculationItem {
-  firstOperand: string;
-  operator: '+' | '-' | '×' | '';
-  lastResult?: string; // 新增字段记录上次结果
-}
-
-interface RouteParams {
-  currentCategoryId?: string;
-  currentCategory?: string;
-  currentIcon?: string;
-}
+import { calculation, calculationItem,
+  Category,
+  expensesCategories,
+  fourRowList,
+  listAnimationItem,
+  incomeCategories,
+  oneRowList,
+  RouteParams,
+  textItem, threeRowList, twoRowList } from '../common/accountOptions';
 
 @Entry
 @Component
 struct AccountPage {
   @State private currentIndex: number = 2
   @State currentAccount: AuthToken | null = null;
-  @State listAnimation: GeneratedTypeLiteralInterface_1 = {
+  @State listAnimation: listAnimationItem = {
     translateX: 0,
-    // opacity: 1,
     direction: 'left'
   }
   @State private animating: boolean = false;
@@ -57,285 +32,15 @@ struct AccountPage {
   @State amount: string = '0.00'
   @State showKeyboard: boolean = false
   @State note: string = ''
-  @State calculation: calculationItem = {
-    firstOperand: '',
-    operator: '',
-    lastResult: '', // 新增字段记录上次结果
-  }
-  private oneRowList: textItem[] = [
-    { label: '7', icon: '' },
-    { label: '8', icon: '' },
-    { label: '9', icon: '' },
-    { label: '今天', icon: '' },
-  ];
-  private twoRowList: textItem[] = [
-    { label: '4', icon: '' },
-    { label: '5', icon: '' },
-    { label: '6', icon: '' },
-    { label: '+', icon: '' },
-  ];
-  private threeRowList: textItem[] = [
-    { label: '1', icon: '' },
-    { label: '2', icon: '' },
-    { label: '3', icon: '' },
-    { label: '-', icon: '' },
-  ];
-  private fourRowList: textItem[] = [
-    { label: '.', icon: '' },
-    { label: '0', icon: '' },
-    { label: 'x', icon: '' },
-    {
-      label: this.calculation.operator ? '=' : '完成',
-      icon: '',
-      isConfirm: true
-    }
-  ];
+  @State calculation: calculationItem = calculation;
+  private oneRowList: textItem[] = oneRowList;
+  private twoRowList: textItem[] = twoRowList;
+  private threeRowList: textItem[] = threeRowList;
+  private fourRowList: textItem[] = fourRowList;
   // 支出的分类数据
-  @State expensesCategories: Category[] = [
-    {
-      id: '0',
-      name: '餐饮',
-      icon: '\ue8a4',
-      selectedIcon: 'e8a4'
-    },
-    {
-      id: '1',
-      name: '购物',
-      icon: '\ue899',
-      selectedIcon: 'e899'
-    },
-    {
-      id: '2',
-      name: '日用',
-      icon: '\ue604',
-      selectedIcon: 'e604'
-    },
-    {
-      id: '3',
-      name: '交通',
-      icon: '\ue61e',
-      selectedIcon: 'e61e'
-    },
-    {
-      id: '4',
-      name: '蔬菜',
-      icon: '\ue713',
-      selectedIcon: 'e713'
-    },
-    {
-      id: '5',
-      name: '水果',
-      icon: '\ue631',
-      selectedIcon: 'e631'
-    },
-    {
-      id: '6',
-      name: '零食',
-      icon: '\ue625',
-      selectedIcon: 'e625'
-    },
-    {
-      id: '7',
-      name: '运动',
-      icon: '\ue69b',
-      selectedIcon: 'e69b'
-    },
-    {
-      id: '8',
-      name: '娱乐',
-      icon: '\ue639',
-      selectedIcon: 'e639'
-    },
-    {
-      id: '9',
-      name: '通讯',
-      icon: '\ue632',
-      selectedIcon: 'e632'
-    },
-    {
-      id: '10',
-      name: '服饰',
-      icon: '\ue60d',
-      selectedIcon: 'e60d'
-    },
-    {
-      id: '11',
-      name: '美容',
-      icon: '\ue657',
-      selectedIcon: 'e657'
-    },
-    {
-      id: '12',
-      name: '住房',
-      icon: '\ue63b',
-      selectedIcon: 'e63b'
-    },
-    {
-      id: '13',
-      name: '居家',
-      icon: '\ue61b',
-      selectedIcon: 'e61b'
-    },
-    {
-      id: '14',
-      name: '孩子',
-      icon: '\ue84e',
-      selectedIcon: 'e84e'
-    },
-    {
-      id: '15',
-      name: '长辈',
-      icon: '\ue654',
-      selectedIcon: 'e654'
-    },
-    {
-      id: '16',
-      name: '社交',
-      icon: '\ue615',
-      selectedIcon: 'e615'
-    },
-    {
-      id: '17',
-      name: '旅行',
-      icon: '\ue655',
-      selectedIcon: 'e655'
-    },
-    {
-      id: '18',
-      name: '烟酒',
-      icon: '\ue60f',
-      selectedIcon: 'e60f'
-    },
-    {
-      id: '19',
-      name: '数码',
-      icon: '\ue611',
-      selectedIcon: 'e611'
-    },
-    {
-      id: '20',
-      name: '汽车',
-      icon: '\ue65d',
-      selectedIcon: 'e65d'
-    },
-    {
-      id: '21',
-      name: '医疗',
-      icon: '\ue646',
-      selectedIcon: 'e646'
-    },
-    {
-      id: '22',
-      name: '书籍',
-      icon: '\ue606',
-      selectedIcon: 'e606'
-    },
-    {
-      id: '23',
-      name: '学习',
-      icon: '\ue763',
-      selectedIcon: 'e763'
-    },
-    {
-      id: '24',
-      name: '宠物',
-      icon: '\ue90d',
-      selectedIcon: 'e90d'
-    },
-    {
-      id: '25',
-      name: '礼金',
-      icon: '\ue651',
-      selectedIcon: 'e651'
-    },
-    {
-      id: '26',
-      name: '礼物',
-      icon: '\ue600',
-      selectedIcon: 'e600'
-    },
-    {
-      id: '27',
-      name: '办公',
-      icon: '\ue624',
-      selectedIcon: 'e624'
-    },
-    {
-      id: '28',
-      name: '维修',
-      icon: '\ue633',
-      selectedIcon: 'e633'
-    },
-    {
-      id: '29',
-      name: '捐赠',
-      icon: '\ue634',
-      selectedIcon: 'e634'
-    },
-    {
-      id: '30',
-      name: '彩票',
-      icon: '\ue613',
-      selectedIcon: 'e613'
-    },
-    {
-      id: '31',
-      name: '亲友',
-      icon: '\ue61d',
-      selectedIcon: 'e61d'
-    },
-    {
-      id: '32',
-      name: '快递',
-      icon: '\ue696',
-      selectedIcon: 'e696'
-    },
-    {
-      id: '33',
-      name: '设置',
-      icon: '\ue605',
-      selectedIcon: 'e605'
-    }
-  ]
+  @State expensesCategories: Category[] = expensesCategories;
   // 收入的分类数据
-  @State incomeCategories: Category[] = [
-    {
-      id: '00',
-      name: '工资',
-      icon: '\ue764',
-      selectedIcon: 'e764'
-    },
-    {
-      id: '01',
-      name: '兼职',
-      icon: '\ue61f',
-      selectedIcon: 'e61f'
-    },
-    {
-      id: '02',
-      name: '理财',
-      icon: '\ue623',
-      selectedIcon: 'e623'
-    },
-    {
-      id: '03',
-      name: '礼金',
-      icon: '\ue792',
-      selectedIcon: 'e792'
-    },
-    {
-      id: '04',
-      name: '其它',
-      icon: '\ue65a',
-      selectedIcon: 'e65a'
-    },
-    {
-      id: '05',
-      name: '设置',
-      icon: '\ue605',
-      selectedIcon: 'e605'
-    }
-  ]
+  @State incomeCategories: Category[] = incomeCategories;
 
   onPageShow(): void {
     // 注册字体
@@ -367,6 +72,7 @@ struct AccountPage {
     MemoryCache.delete('cache_route');
   }
 
+  // 关闭页面
   private closePage() {
     if (this.animating) {
       return;
@@ -386,6 +92,7 @@ struct AccountPage {
     });
   }
 
+  // 切换分类
   private switchTab(tab: string) {
     if (tab === this.selectedTab) {
       return;
@@ -412,7 +119,6 @@ struct AccountPage {
         }, () => {
           this.listAnimation = {
             translateX: 0,
-            // opacity: 1,
             direction: newDirection
           };
         });
@@ -420,12 +126,12 @@ struct AccountPage {
     }, () => {
       this.listAnimation = {
         translateX: newDirection === 'left' ? -100 : 100,
-        // opacity: 0.5,
         direction: newDirection
       };
     });
   }
 
+  // 选择分类
   private selectCategory(item: Category) {
     animateTo({
       duration: 150,
@@ -437,7 +143,7 @@ struct AccountPage {
     })
   }
 
-  // 新增Tab构建方法
+  // tab UI构建
   @Builder
   buildTabItem(tabName: string) {
     Column() {
@@ -459,35 +165,8 @@ struct AccountPage {
     .alignItems(HorizontalAlign.Center)
   }
 
-  @Builder
-  buildTopBar() {
-    Column() {
-      Row() {
-        Text('取消')
-          .fontSize(16)
-          .fontColor('#666666')
-          .onClick(() => router.back())
 
-        Blank()
-
-        Row() {
-          Text('支出')
-            .fontSize(18)
-            .fontColor('#333333')
-            .fontWeight(FontWeight.Bold)
-            .margin({ right: 24 })
-
-          Text('收入')
-            .fontSize(18)
-            .fontColor('#999999')
-        }
-      }
-      .padding(16)
-    }
-    .backgroundColor('#FFD700')
-    .width('100%')
-  }
-
+  // 自定义键盘 UI构建
   @Builder
   buildNumberKeyboard() {
     Column() {
@@ -568,14 +247,7 @@ struct AccountPage {
     .backgroundColor('#F5F5F5')
   }
 
-  private dynamicTextHandle = (label: string) => {
-    let dynamicText = label;
-    if (label === '完成' && this.calculation.operator) {
-      dynamicText = '='
-    }
-    return dynamicText;
-  }
-
+  // 键盘按钮 UI构建
   @Builder
   buildKeyButton(label: string, isBlank: boolean = false, isConfirm: boolean = false) {
     Button() {
@@ -609,6 +281,16 @@ struct AccountPage {
     .visibility(isBlank ? Visibility.Hidden : Visibility.Visible)
   }
 
+  // 键盘文本筛选
+  private dynamicTextHandle = (label: string) => {
+    let dynamicText = label;
+    if (label === '完成' && this.calculation.operator) {
+      dynamicText = '='
+    }
+    return dynamicText;
+  }
+
+  // 键盘功能事件筛选
   private handleKeyPress(key: string) {
     switch (key) {
       case '+':
@@ -632,6 +314,7 @@ struct AccountPage {
     }
   }
 
+  // 键盘功能操作
   private handleOperator(operator: '+' | '-' | '×') {
     const cleanAmount = this.amount.replace(/[^0-9.]/g, '');
 
@@ -678,11 +361,11 @@ struct AccountPage {
     let result = 0;
 
     if (this.calculation.lastResult) {
-      // 处理连续运算（如7+2+3=）
+      // 处理连续运算
       const current = parseFloat(this.amount || '0');
       result = parseFloat(this.calculation.lastResult) + current;
     } else if (this.calculation.firstOperand) {
-      // 标准运算（如7+2=）
+      // 标准运算
       result = this.calculateIntermediate();
     }
 
@@ -695,12 +378,14 @@ struct AccountPage {
     this.calculation = { firstOperand: '', operator: '', lastResult: '' };
   }
 
+  // 清空输入文本
   private clearCalculation() {
     this.amount = '0.00';
     this.calculation = { firstOperand: '', operator: '' };
     this.showKeyboard = true; // 保持键盘打开
   }
 
+  // 提交记账
   private finishAccount() {
     if (!this.currentAccount?.id) {
       return;
@@ -734,6 +419,7 @@ struct AccountPage {
     }, 1000)
   }
 
+  // 键盘数字输入
   private processAmountInput(key: string) {
     // 重置计算状态时的输入
     if (this.calculation.operator && this.amount === '0.00') {
@@ -801,7 +487,7 @@ struct AccountPage {
             GridItem() {
               Column({ space: 8 }) {
                 Row() {
-                  Text(item.icon)//引号里的'\u'+编号为官网图片的后四位
+                  Text(item.icon)
                     .fontFamily('myFont')//这句话必须加上，不然不显示
                     .fontSize(20)
                     .fontColor('#333333')
@@ -839,7 +525,6 @@ struct AccountPage {
           x: this.listAnimation.translateX
         })
 
-        // .opacity(this.listAnimation.opacity)
 
         // 数字键盘（条件渲染）
         if (this.showKeyboard) {
