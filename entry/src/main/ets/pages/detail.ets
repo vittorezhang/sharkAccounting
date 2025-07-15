@@ -296,11 +296,11 @@ struct DetailPage {
         .width('100%')
         .margin({ top: 64, bottom: 56 })
       }
-      .height('100%') // 关键修改：设置固定高度
+      .height('100%')
       .scrollable(ScrollDirection.Vertical)
       .scrollBar(BarState.Auto)
       .layoutWeight(1)
-      .align(Alignment.Top) // 确保填充剩余空间
+      .align(Alignment.Top)
 
 
       // 3. 底部TabBar
