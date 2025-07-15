@@ -108,8 +108,8 @@ struct DetailPage {
     }
     // 获取点击位置（适配不同设备）
     this.editPosition = {
-      x: event.offsetX + 24,
-      y: event.offsetY - 6
+      x: event.offsetX + 32,
+      y: event.offsetY - 2
     };
   }
 
@@ -229,13 +229,16 @@ struct DetailPage {
               }
               .height(24)
 
-              Flex({ justifyContent: FlexAlign.SpaceBetween }) {
+              Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
                 Row() {
                   Text(item.selectedIcon)
                     .fontFamily('myFont')
                     .fontSize(20)
                     .fontColor('#333333')
                 }
+                .width(32)
+                .height(32)
+                .justifyContent(FlexAlign.Center)
                 .backgroundColor('#FFD700')
                 .borderRadius('50%')
                 .onClick(() => {
@@ -274,7 +277,7 @@ struct DetailPage {
                     .fontColor('#333333')
                 }
               }
-              .height(24)
+              .height(32)
               .margin({ top: 4, bottom: 4 })
             }
             .width('100%')
