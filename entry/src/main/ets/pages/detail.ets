@@ -6,6 +6,7 @@ import { StorageUtil } from '../../../utils/Storage';
 import font from '@ohos.font';
 import { promptAction, router } from '@kit.ArkUI';
 import BadgeDialog from '../components/BadgeDialog';
+import { DateUtil } from '../../../utils/DateUtil';
 
 interface editPositionItem {
   x: number;
@@ -21,7 +22,8 @@ interface RouteParams {
 struct DetailPage {
   @State private currentIndex: number = 0
   @State currentAccount: AuthToken | null = null;
-  @State currentDate: string = this.getFormattedDate();
+  // @State currentDate: string = this.getFormattedDate();
+  @State currentTime: string = '';
   @State income: number = 0;
   @State expenses: number = 0;
   @State transactions: AccountingRecord[] = [];
@@ -219,7 +221,7 @@ struct DetailPage {
             Column({ space: 8 }) {
               Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 Row() {
-                  Text(this.currentDate)
+                  Text(DateUtil.formatCST(item.createTime))
                     .fontSize(16)
                     .fontColor('#999999')
                     .fontWeight(500)
