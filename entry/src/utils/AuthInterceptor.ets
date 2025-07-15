@@ -1,4 +1,4 @@
-import { StorageUtil } from "./storage";
+import { StorageUtil } from "./Storage";
 import { router } from "@kit.ArkUI";
 import { BusinessError } from '@ohos.base';
 import { AuthToken } from "../main/ets/viewModel/commonFunction";
@@ -59,7 +59,6 @@ export class AuthInterceptor {
         throw new Error('Refreshed token verification failed');
       }
 
-      // 4. 类型安全的账户更新
       const updatedAccount: AuthToken = {
         id: account.id,
         username: account.username,
@@ -98,7 +97,6 @@ export class AuthInterceptor {
     }
   }
 
-  // 静态方法调用需要类名限定
   private static async redirectToLogin(): Promise<void> {
     try {
       await router.replaceUrl({
@@ -113,14 +111,11 @@ export class AuthInterceptor {
     }
   }
 
-  // 显式声明返回类型和错误类型
   static async checkLoginStatus(): Promise<boolean> {
     try {
       const account = await StorageUtil.getCurrentAccount();
-
-      // 严格类型检查
       if (!account?.token || !(await StorageUtil.verifyToken(account.token))) {
-        await AuthInterceptor.redirectToLogin(); // 使用this访问静态方法
+        await AuthInterceptor.redirectToLogin();
         return false;
       }
       return true;

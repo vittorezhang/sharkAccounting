@@ -3,7 +3,7 @@ import { promptAction, router } from '@kit.ArkUI'
 import { MemoryCache } from '../../../utils/MemoryCache';
 import TabBar from '../components/TabBar'
 import { AccountData, AccountingRecord, AuthToken } from '../viewModel/commonFunction';
-import { StorageUtil } from '../../../utils/storage';
+import { StorageUtil } from '../../../utils/Storage';
 
 interface Category {
   id: string;

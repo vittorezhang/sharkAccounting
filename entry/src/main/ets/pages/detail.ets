@@ -2,7 +2,7 @@ import TabBar from '../components/TabBar'
 import FinanceHeader from '../components/FinanceHeader'
 import { MemoryCache } from '../../../utils/MemoryCache';
 import { AccountingRecord, AuthToken, RouteData } from '../viewModel/commonFunction';
-import { StorageUtil } from '../../../utils/storage';
+import { StorageUtil } from '../../../utils/Storage';
 import font from '@ohos.font';
 import { promptAction, router } from '@kit.ArkUI';
 import BadgeDialog from '../components/BadgeDialog';

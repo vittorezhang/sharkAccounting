@@ -1,6 +1,6 @@
 import TabBar from '../components/TabBar';
 import { promptAction, router } from '@kit.ArkUI';
-import { StorageUtil } from '../../../utils/storage';
+import { StorageUtil } from '../../../utils/Storage';
 import { actionBarItem, AuthToken, operateAreaItem, RouteData, statsItem } from '../viewModel/commonFunction';
 import { MemoryCache } from '../../../utils/MemoryCache';
 

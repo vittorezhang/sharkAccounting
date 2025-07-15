@@ -1,5 +1,5 @@
 import { router, promptAction } from '@kit.ArkUI';
-import { StorageUtil } from '../../../utils/storage';
+import { StorageUtil } from '../../../utils/Storage';
 import { AuthToken, registerItem } from '../viewModel/commonFunction';
 
 // 登录页面
@@ -11,7 +11,7 @@ struct IndexPage {
   @State isAgreed: boolean = false;
   @State showErrors: boolean = false;
   @State showSessionTip: boolean = false;
-  @State accountList: AuthToken[] = []; // 明确定义类型
+  @State accountList: AuthToken[] = [];
 
   // 校验规则
   private validateForm(): boolean {
@@ -123,7 +123,6 @@ struct IndexPage {
   //   const token = await StorageUtil.getAuthToken();
   //   if (token) {
   //     this.username = token.username;
-  //     // 实际项目不应该自动填充密码
   //     // this.password = token.password;
   //   }
   // }
@@ -313,13 +312,14 @@ struct IndexPage {
               .fontColor('#999999')
               .onClick(() => {
                 // 找回密码
+                promptAction.showToast({ message: '找回密码待开发' });
               })
             // 添加竖线分隔符
             Divider()
               .vertical(true)
               .strokeWidth(1)
               .color('#E5E5E5')
-              .height(14)// 与文字高度一致
+              .height(14)
               .margin({ left: 16, right: 16 })
 
             Text('注册账号')

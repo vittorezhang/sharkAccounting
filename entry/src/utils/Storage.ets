@@ -1,7 +1,6 @@
 import { preferences } from '@kit.ArkData';
 import { AccountingRecord, AccountList, AuthToken } from '../main/ets/viewModel/commonFunction';
 import { Base64Util } from './Base64Util';
-import { router } from '@kit.ArkUI';
 
 interface GeneratedTypeLiteralInterface {
   exp?: number;
@@ -11,6 +10,14 @@ interface GeneratedTypeLiteralInterface {
 export class StorageUtil {
   private static readonly PREFERENCES_NAME = 'my_app_preferences';
   private static readonly ACCOUNT_LIST_KEY = 'account_list';
+
+  // 获取Preferences实例（支持多种数据类型）
+  public static async getPreferences(): Promise<preferences.Preferences> {
+    return await preferences.getPreferences(
+      getContext(),
+      StorageUtil.PREFERENCES_NAME
+    );
+  }
 
   // -------------------记账数据 start----------------------
 
@@ -158,14 +165,6 @@ export class StorageUtil {
   }
 
   // -------------------添加token 时效end------------------
-
-  // 获取Preferences实例（支持多种数据类型）
-  public static async getPreferences(): Promise<preferences.Preferences> {
-    return await preferences.getPreferences(
-      getContext(),
-      StorageUtil.PREFERENCES_NAME
-    );
-  }
 
   // ------------------多账户存储start-----------------------
 

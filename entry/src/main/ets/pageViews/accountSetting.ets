@@ -1,5 +1,5 @@
 import { router, promptAction } from '@kit.ArkUI';
-import { StorageUtil } from '../../../utils/storage';
+import { StorageUtil } from '../../../utils/Storage';
 import { AuthToken } from '../viewModel/commonFunction';
 
 @Entry

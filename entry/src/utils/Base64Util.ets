@@ -2,7 +2,6 @@ export class Base64Util {
   private static keyStr: string =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-  // Base64 编码（静态方法）
   static encode(input: string): string {
     let output: string = "";
     let i: number = 0;
@@ -31,7 +30,6 @@ export class Base64Util {
     return output;
   }
 
-  // Base64 解码（静态方法）
   static decode(input: string): string {
     let output: string = "";
     let i: number = 0;
@@ -62,12 +60,10 @@ export class Base64Util {
     return output;
   }
 
-  // 静态工具方法
   private static getCharCode(str: string, index: number): number {
     return index < str.length ? str.charCodeAt(index) : NaN;
   }
 
-  // 静态工具方法
   private static fromCharCode(...codes: number[]): string {
     return String.fromCharCode(...codes);
   }

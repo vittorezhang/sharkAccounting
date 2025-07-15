@@ -1,12 +1,12 @@
 import { router } from '@kit.ArkUI';
 import { promptAction } from '@kit.ArkUI';
-import { StorageUtil } from '../../../utils/storage';
+import { StorageUtil } from '../../../utils/Storage';
 import { AuthToken, registerItem } from '../viewModel/commonFunction';
 
 @Entry
 @Component
 struct RegisterPage {
-  @State accountList: AuthToken[] = []; // 明确定义类型
+  @State accountList: AuthToken[] = [];
   @State username: string = '';
   @State password: string = '';
   @State confirmPassword: string = '';
@@ -213,6 +213,7 @@ struct RegisterPage {
             .fontColor('#FFD700')
             .onClick(() => {
               // 跳转用户协议
+              promptAction.showToast({ message: '用户协议待开发' });
             })
 
           Text('和')
@@ -224,6 +225,7 @@ struct RegisterPage {
             .fontColor('#FFD700')
             .onClick(() => {
               // 跳转隐私协议
+              promptAction.showToast({ message: '隐私协议待开发' });
             })
         }
         .width('90%')
