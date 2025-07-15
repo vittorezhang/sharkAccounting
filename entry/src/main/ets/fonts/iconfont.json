@@ -6,6 +6,20 @@
   "description": "鲨鱼记账",
   "glyphs": [
     {
+      "icon_id": "5881174",
+      "name": "清除",
+      "font_class": "qingchu",
+      "unicode": "e63e",
+      "unicode_decimal": 58942
+    },
+    {
+      "icon_id": "5638799",
+      "name": "日期",
+      "font_class": "riqi",
+      "unicode": "e616",
+      "unicode_decimal": 58902
+    },
+    {
       "icon_id": "1079473",
       "name": "兼职",
       "font_class": "jianzhi",
