@@ -585,10 +585,17 @@ struct AccountPage {
             .width(20)
             .height(20)
         }
-        Text(this.dynamicTextHandle(label))
-          .fontSize(18)
-          .fontWeight(500)
-          .fontColor('#333333')
+        if (label === 'x') {
+          Text('\ue63e')
+            .fontFamily('myFont')
+            .fontSize(20)
+            .fontColor('#333333')
+        } else {
+          Text(this.dynamicTextHandle(label))
+            .fontSize(18)
+            .fontWeight(500)
+            .fontColor('#333333')
+        }
       }
     }
     .type(ButtonType.Normal)
