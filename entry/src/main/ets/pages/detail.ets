@@ -34,6 +34,20 @@ struct DetailPage {
   @State currentEditRemark: string = '';
   @State currentEditCategoryId: string = '';
   @State currentEditCreateTime: string = '';
+  @State currentEditAmount: number = 0;
+  private debounceTimer: number = 0; // 防抖计时器
+
+  // 防抖函数封装
+  private debounce(func: () => void, delay: number) {
+    // 清除之前的计时器
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
+    // 设置新的计时器
+    this.debounceTimer = setTimeout(() => {
+      func();
+    }, delay) as number;
+  }
 
   // 获取记账数据
   private async getCategory(accountId: string) {
@@ -70,8 +84,9 @@ struct DetailPage {
     this.income = 0
     this.expenses = 0
     // 1. 获取当前数据
-    const selectedCategory = this.currentEditCategory || item.category || '其他';
+    const selectedCategory = item.category || '其他';
     const selectedRemark = this.currentEditRemark || item.remark || undefined;
+    const selectedAmount = this.currentEditAmount || item.amount || 0;
     // 2. 创建新记录
     const newRecord: AccountingRecord = {
       currentAccountId: this.currentAccount.id,
@@ -80,7 +95,7 @@ struct DetailPage {
       type: item.type,
       selectedIcon: item.selectedIcon,
       category: selectedCategory,
-      amount: item.amount,
+      amount: selectedAmount,
       remark: selectedRemark,
       createTime: (item.id === this.currentEditCategoryId && item.createTime === this.currentEditCreateTime) ?
       item.createTime : new Date().toISOString()
@@ -94,45 +109,91 @@ struct DetailPage {
       }
       // 刷新记账列表
       this.getCategory(this.currentAccount?.id);
+      this.isEditing = false;
     }, 1000)
   }
 
   // 长按手势处理
-  private handleLongPress(event: GestureEvent, item: AccountingRecord) {
+  private handleLongPress(event: GestureEvent, item: AccountingRecord, type: string) {
     this.isEditing = true;
     this.currentEditCategoryId = item.id;
     this.currentEditCreateTime = item.createTime;
-    this.currentEditCategory = item.category;
-    if (item?.remark) {
-      this.currentEditRemark = item.remark;
+    if (type == 'text') {
+      // this.currentEditCategory = '';
+      // this.currentEditRemark = '';
+      this.currentEditAmount = 0;
+      this.currentEditCategory = item.category;
+      if (item?.remark) {
+        this.currentEditRemark = item.remark;
+      }
+      // 获取点击位置（适配不同设备）
+      this.editPosition = {
+        x: event.offsetX + 32,
+        y: event.offsetY - 2
+      };
     }
-    // 获取点击位置（适配不同设备）
-    this.editPosition = {
-      x: event.offsetX + 32,
-      y: event.offsetY - 2
-    };
+    if (type == 'money') {
+      this.currentEditCategory = '';
+      this.currentEditRemark = '';
+      // this.currentEditAmount = 0;
+      this.currentEditAmount = item.amount;
+      // 获取点击位置（适配不同设备）
+      this.editPosition = {
+        x: -60,
+        y: -8,
+      };
+    }
   }
 
   // 编辑框组件
   @Builder
-  editCategoryInput(item: AccountingRecord) {
+  editCategoryInput(item: AccountingRecord, type: string) {
     if (this.isEditing) {
-      Column() {
-        TextInput({ text: this.currentEditRemark || this.currentEditCategory })
-          .width('70%')
-          .height(34)
-          .backgroundColor('#FFFFFF')
-          .border({ width: 1, color: '#FFD700' })
-          .onChange((value) => {
-            this.currentEditCategory = value;
-            this.currentEditRemark = value;
-          })
-          .onBlur(() => {
-            this.saveCategory(item);
-          })
+      // 编辑分类或备注
+      if (type == 'text') {
+        Column() {
+          TextInput({ text: item?.remark ? this.currentEditRemark : this.currentEditCategory })
+            .width('70%')
+            .height(34)
+            .backgroundColor('#FFFFFF')
+            .border({ width: 1, color: '#FFD700' })
+            .onChange((value) => {
+              // 使用防抖包装处理逻辑
+              this.debounce(() => {
+                this.currentEditCategory = item?.category;
+                this.currentEditRemark = value;
+                console.log('防抖后的值:', this.currentEditRemark || this.currentEditCategory);
+              }, 1000); // 1000ms防抖间隔
+            })
+            .onBlur(() => {
+              this.saveCategory(item);
+            })
+        }
+        .position({ x: this.editPosition.x, y: this.editPosition.y })
+        .zIndex(10)
       }
-      .position({ x: this.editPosition.x, y: this.editPosition.y })
-      .zIndex(10)
+      // 编辑金额
+      if (type == 'money') {
+        Column() {
+          TextInput({ text: String(this.currentEditAmount) })
+            .width('30%')
+            .height(34)
+            .backgroundColor('#FFFFFF')
+            .border({ width: 1, color: '#FFD700' })
+            .onChange((value) => {
+              // 使用防抖包装处理逻辑
+              this.debounce(() => {
+                this.currentEditAmount = Number(value);
+                console.log('防抖后的值:', this.currentEditAmount);
+              }, 1000); // 1000ms防抖间隔
+            })
+            .onBlur(() => {
+              this.saveCategory(item);
+            })
+        }
+        .position({ x: this.editPosition.x, y: this.editPosition.y })
+        .zIndex(10)
+      }
     }
   }
 
@@ -172,6 +233,12 @@ struct DetailPage {
         this.budgeVisible = true;
       }
     });
+  }
+
+  aboutToDisappear() {
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
   }
 
   build() {
@@ -242,6 +309,7 @@ struct DetailPage {
                 .backgroundColor('#FFD700')
                 .borderRadius('50%')
                 .onClick(() => {
+                  console.log('item', JSON.stringify(item))
                   // 跳转记账页面
                   router.replaceUrl({
                     url: 'pages/account',
@@ -261,13 +329,15 @@ struct DetailPage {
                 .gesture(
                   LongPressGesture({ repeat: false })
                     .onAction((event: GestureEvent) => {
-                      this.handleLongPress(event, item);
+                      this.handleLongPress(event, item, 'text');
                     })
                 )
 
-                if (this.currentEditCategoryId === item.id && this.currentEditCreateTime === item.createTime) {
+                // 编辑分类或备注
+                if (this.currentEditCategoryId === item.id && this.currentEditCreateTime === item.createTime &&
+                  this.currentEditCategory == item.category) {
                   // 编辑框（放在Stack最上层）
-                  this.editCategoryInput(item)
+                  this.editCategoryInput(item, 'text')
                 }
 
 
@@ -275,7 +345,19 @@ struct DetailPage {
                   Text(`${item.type === 'expense' ? '-' : '+'}${item.amount}`)
                     .fontSize(16)
                     .fontColor('#333333')
+                  // 编辑金额
+                  if (this.currentEditCategoryId === item.id && this.currentEditCreateTime === item.createTime &&
+                    this.currentEditAmount == item.amount) {
+                    // 编辑框（放在Stack最上层）
+                    this.editCategoryInput(item, 'money')
+                  }
                 }
+                .gesture(
+                  LongPressGesture({ repeat: false })
+                    .onAction((event: GestureEvent) => {
+                      this.handleLongPress(event, item, 'money');
+                    })
+                )
               }
               .height(32)
               .margin({ top: 4, bottom: 4 })
