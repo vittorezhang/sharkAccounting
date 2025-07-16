@@ -4,7 +4,9 @@ import { MemoryCache } from '../../../utils/MemoryCache';
 import TabBar from '../components/TabBar'
 import { AccountingRecord, AuthToken } from '../viewModel/commonFunction';
 import { StorageUtil } from '../../../utils/Storage';
-import { calculation, calculationItem,
+import {
+  calculation,
+  calculationItem,
   Category,
   expensesCategories,
   fourRowList,
@@ -12,7 +14,10 @@ import { calculation, calculationItem,
   incomeCategories,
   oneRowList,
   RouteParams,
-  textItem, threeRowList, twoRowList } from '../common/accountOptions';
+  textItem,
+  threeRowList,
+  twoRowList
+} from '../common/accountOptions';
 
 @Entry
 @Component
@@ -51,8 +56,14 @@ struct AccountPage {
     // 明细页 传过来的参数
     const params = router.getParams() as RouteParams;
     if (params) {
+      console.log('params', JSON.stringify(params))
       this.selectedCategory = params?.currentCategory || '';
       this.selectedCategoryId = params?.currentCategoryId || '';
+      // 处理[收入&支付]的tab页面回显
+      if (params?.currentCategory &&
+      ['工资', '兼职', '理财', '礼金', '其它', '设置'].includes(params?.currentCategory)) {
+        this.selectedTab = '收入'
+      }
       // 预留TODO
       // this.selectCategory({
       //   name: params.currentCategory,
@@ -164,7 +175,6 @@ struct AccountPage {
     }
     .alignItems(HorizontalAlign.Center)
   }
-
 
   // 自定义键盘 UI构建
   @Builder
