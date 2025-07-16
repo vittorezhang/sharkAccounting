@@ -46,6 +46,20 @@ struct AccountPage {
   @State expensesCategories: Category[] = expensesCategories;
   // 收入的分类数据
   @State incomeCategories: Category[] = incomeCategories;
+  // 防抖计时器
+  private debounceTimer: number = 0;
+
+  // 防抖函数封装
+  private debounce(func: () => void, delay: number) {
+    // 清除之前的计时器
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
+    // 设置新的计时器
+    this.debounceTimer = setTimeout(() => {
+      func();
+    }, delay) as number;
+  }
 
   onPageShow(): void {
     // 注册字体
@@ -81,6 +95,12 @@ struct AccountPage {
 
   onPageHide(): void {
     MemoryCache.delete('cache_route');
+  }
+
+  aboutToDisappear() {
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
   }
 
   // 关闭页面
@@ -415,8 +435,11 @@ struct AccountPage {
       remark: this.note || undefined, // 从备注输入框获取
       createTime: new Date().toISOString()
     };
-    // 保存记账数据
-    StorageUtil.saveAccountingRecord(newRecord);
+    // 使用防抖包装处理逻辑
+    this.debounce(() => {
+      // 保存记账数据
+      StorageUtil.saveAccountingRecord(newRecord);
+    }, 500); // 500ms防抖间隔
 
     setTimeout(() => {
       // 跳转明细页面
