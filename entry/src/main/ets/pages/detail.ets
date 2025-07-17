@@ -139,8 +139,8 @@ struct DetailPage {
       this.currentEditAmount = item.amount;
       // 获取点击位置（适配不同设备）
       this.editPosition = {
-        x: -60,
-        y: -8,
+        x: 0,
+        y: -6,
       };
     }
   }
@@ -176,8 +176,9 @@ struct DetailPage {
       if (type == 'money') {
         Column() {
           TextInput({ text: String(this.currentEditAmount) })
-            .width('30%')
+            .width('100%')
             .height(34)
+            .textAlign(TextAlign.End)
             .backgroundColor('#FFFFFF')
             .border({ width: 1, color: '#FFD700' })
             .onChange((value) => {
@@ -326,6 +327,7 @@ struct DetailPage {
                     .fontSize(16)
                 }
                 .width('70%')
+                .padding({ left: 16 })
                 .gesture(
                   LongPressGesture({ repeat: false })
                     .onAction((event: GestureEvent) => {
@@ -352,6 +354,8 @@ struct DetailPage {
                     this.editCategoryInput(item, 'money')
                   }
                 }
+                .width('25%')
+                .justifyContent(FlexAlign.End)
                 .gesture(
                   LongPressGesture({ repeat: false })
                     .onAction((event: GestureEvent) => {
@@ -359,6 +363,7 @@ struct DetailPage {
                     })
                 )
               }
+              .width('100%')
               .height(32)
               .margin({ top: 4, bottom: 4 })
             }
