@@ -348,21 +348,21 @@ struct AccountPage {
   private handleOperator(operator: '+' | '-' | '×') {
     const cleanAmount = this.amount.replace(/[^0-9.]/g, '');
 
-    // 首次运算符输入
-    if (!this.calculation.operator) {
-      this.calculation = {
-        firstOperand: cleanAmount,
-        operator,
-        lastResult: ''
-      };
-    }
-    // 连续运算符输入（如7+2+）
-    else {
+    // 如果已经有运算符，先计算中间结果
+    if (this.calculation.operator) {
       const result = this.calculateIntermediate();
       this.calculation = {
         firstOperand: result.toString(),
         operator,
         lastResult: result.toString()
+      };
+    }
+    // 首次运算符输入
+    else {
+      this.calculation = {
+        firstOperand: cleanAmount,
+        operator,
+        lastResult: ''
       };
     }
 
@@ -390,13 +390,13 @@ struct AccountPage {
   private calculateResult() {
     let result = 0;
 
-    if (this.calculation.lastResult) {
-      // 处理连续运算
-      const current = parseFloat(this.amount || '0');
-      result = parseFloat(this.calculation.lastResult) + current;
-    } else if (this.calculation.firstOperand) {
-      // 标准运算
+    // 如果有未完成的运算（如 2+6+）
+    if (this.calculation.operator && this.calculation.firstOperand) {
       result = this.calculateIntermediate();
+    }
+    // 如果是连续运算（如按了=之后继续）
+    else if (this.calculation.lastResult) {
+      result = parseFloat(this.calculation.lastResult);
     }
 
     // 格式化显示
@@ -404,8 +404,12 @@ struct AccountPage {
     result.toString() :
     result.toFixed(2);
 
-    // 重置状态
-    this.calculation = { firstOperand: '', operator: '', lastResult: '' };
+    // 保留最后结果用于连续运算
+    this.calculation = {
+      firstOperand: '',
+      operator: '',
+      lastResult: result.toString()
+    };
   }
 
   // 清空输入文本
