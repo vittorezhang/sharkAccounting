@@ -1,7 +1,7 @@
 import TabBar from '../components/TabBar'
 import FinanceHeader from '../components/FinanceHeader'
 import { MemoryCache } from '../../../utils/MemoryCache';
-import { AccountingRecord, AuthToken, RouteData } from '../viewModel/commonFunction';
+import { AccountingRecord, AuthToken, dateTimeItem, RouteData } from '../viewModel/commonFunction';
 import { StorageUtil } from '../../../utils/Storage';
 import font from '@ohos.font';
 import { promptAction, router } from '@kit.ArkUI';
@@ -50,7 +50,7 @@ struct DetailPage {
   }
 
   // 获取记账数据
-  private async getCategory(accountId: string) {
+  private async getCategory(accountId: string, searchParams?: dateTimeItem) {
     // 查账户下所有记账数据
     if (!accountId) {
       return
@@ -64,7 +64,16 @@ struct DetailPage {
     ?.filter(a => a.currentAccountId === accountId)
       ?? [];
     console.log('这是当前登录账户的记账数据', JSON.stringify(currentAccountData));
-    this.transactions = currentAccountData;
+    if (searchParams?.startTime) {
+      this.transactions = currentAccountData?.filter((fItem) => {
+        return searchParams?.startTime.includes(DateUtil.formatCST(fItem.createTime).split(' ')[0])
+      });
+      console.log('这是当前登录账户用日期筛选出来的记账数据', JSON.stringify(this.transactions));
+    } else {
+      console.log('这是当前登录账户的记账数据', JSON.stringify(currentAccountData));
+      this.transactions = currentAccountData
+    }
+
     // 筛选收入累计、支出累计
     this.transactions?.forEach((mItem: AccountingRecord) => {
       if (mItem.type === 'income') {
@@ -272,7 +281,13 @@ struct DetailPage {
       FinanceHeader({
         userName: this.currentAccount?.username,
         income: this.income,
-        expenses: this.expenses
+        expenses: this.expenses,
+        callBack: (searchParams) => {
+          console.log('选择的时期:searchParams', JSON.stringify(searchParams))
+          if (this.currentAccount?.id) {
+            this.getCategory(this.currentAccount?.id, searchParams);
+          }
+        }
       })
         .zIndex(99)
 

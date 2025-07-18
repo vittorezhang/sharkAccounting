@@ -1,11 +1,14 @@
-import { actionBarItem } from "../viewModel/commonFunction";
+import { actionBarItem, dateTimeItem } from "../viewModel/commonFunction";
 import { promptAction, router } from "@kit.ArkUI";
+import DatePickerModal from "./DatePickerModal";
 
 @Component
 export default struct FinanceHeader {
   @Prop userName: string = '';
   @Prop income: number = 0;
   @Prop expenses: number = 0;
+  callBack: (params: dateTimeItem) => void = () => {
+  };
   @State currentYear: string = '2025年';
   private actionBarList: actionBarItem[] = [
     { name: '账单', icon: 'app.media.detail_bill' },
@@ -30,27 +33,10 @@ export default struct FinanceHeader {
               }
 
               // 月份选择
-              Row() {
-                Text('07')
-                  .fontSize(24)
-                  .fontColor('#333333')
-                Row() {
-                  Text('月')
-                    .fontSize(12)
-                    .fontColor('#333333')
-                  Image($r('app.media.detail_below'))
-                    .width(16)
-                    .height(16)
-                    .padding({ left: 4 })
+              DatePickerModal({
+                dateCallBack: (params: dateTimeItem) => {
+                  this.callBack(params)
                 }
-                .padding({ top: 6 })
-              }
-              .width('22%')
-              .border({
-                width: {
-                  right: 1
-                },
-                color: '#cccccc'
               })
             }
             .alignItems(HorizontalAlign.Start)

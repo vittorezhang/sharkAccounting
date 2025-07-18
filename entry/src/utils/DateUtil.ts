@@ -18,10 +18,9 @@ export class DateUtil {
     }`;
   }
 
-  // 带时区版本（东八区）
   static formatCST(isoString: string): string {
     const date = new Date(isoString);
-    date.setHours(date.getHours() + 8);
+    date.setHours(date.getHours());
 
     return this.format(date.toISOString());
   }

@@ -94,3 +94,7 @@ export interface AccountData {
   records: AccountingRecord[]; // 记账记录
   categories: accountType;
 }
+
+export interface dateTimeItem {
+  startTime: String;
+}
