@@ -82,6 +82,41 @@ export class StorageUtil {
     return accountList?.expenseOrIncomeData || null;
   }
 
+  // 删除记账数据【根据当前账户Id与关联的记录id、记录时间删除】
+  public static async deleteCurrentAccountingRecord(record: AccountingRecord) {
+    const pref = await StorageUtil.getPreferences();
+    const value = await pref.get(StorageUtil.ACCOUNT_LIST_KEY, '');
+    const parsed = JSON.parse(value.toString()) as AccountList;
+    if (!parsed.expenseOrIncomeData) {
+      return
+    }
+    const existingIndex = parsed.expenseOrIncomeData.findIndex((a) => {
+      return (a.createTime === record.createTime && a.id === record.id);
+    });
+    if (existingIndex >= 0) {
+      parsed.expenseOrIncomeData.splice(existingIndex, 1);
+    }
+    const saveData: AccountList = {
+      currentAccountId: parsed.currentAccountId,
+      accounts: parsed.accounts.map(account => {
+        const savedAccount: AuthToken = {
+          id: account.id,
+          username: account.username,
+          password: account.password,
+          gender: account.gender,
+          token: account.token,
+          tokenExpire: account.tokenExpire,
+          timestamp: account.timestamp,
+        };
+        return savedAccount;
+      }),
+      expenseOrIncomeData: parsed.expenseOrIncomeData
+    };
+
+    await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(saveData));
+    await pref.flush();
+  }
+
   // -------------------记账数据 end------------------
 
 

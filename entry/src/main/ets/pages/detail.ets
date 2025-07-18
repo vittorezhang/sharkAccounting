@@ -35,6 +35,15 @@ struct DetailPage {
   @State currentEditCategoryId: string = '';
   @State currentEditCreateTime: string = '';
   @State currentEditAmount: number = 0;
+  // 状态管理【拖拽】
+  @State panPosition: editPositionItem = { x: 0, y: 0 };
+  @State isPanning: boolean = false;
+  @State currentPanCategoryId: string = '';
+  @State currentPanCreateTime: string = '';
+  @State offsetX: number = 0;
+  @State offsetY: number = 0;
+  @State positionX: number = 0;
+  @State positionY: number = 0;
   private debounceTimer: number = 0; // 防抖计时器
 
   // 防抖函数封装
@@ -154,6 +163,35 @@ struct DetailPage {
     }
   }
 
+  // 拖拽手势处理
+  private handlePan(event: GestureEvent, item: AccountingRecord) {
+    animateTo({
+      duration: 100,
+      curve: Curve.EaseInOut
+    }, () => {
+      this.isPanning = true;
+    })
+    this.currentPanCategoryId = item.id;
+    this.currentPanCreateTime = item.createTime;
+    if (event.offsetX >= 0) {
+      animateTo({
+        duration: 100,
+        curve: Curve.EaseOut
+      }, () => {
+        this.isPanning = false;
+      })
+    }
+  }
+
+  // 拖拽判断
+  private panJudge(item: AccountingRecord) {
+    let bool = false;
+    if (this.currentPanCategoryId === item.id && this.currentPanCreateTime === item.createTime) {
+      bool = true;
+    }
+    return bool;
+  }
+
   // 编辑框组件
   @Builder
   editCategoryInput(item: AccountingRecord, type: string) {
@@ -204,6 +242,33 @@ struct DetailPage {
         .position({ x: this.editPosition.x, y: this.editPosition.y })
         .zIndex(10)
       }
+    }
+  }
+
+  // 删除组件
+  @Builder
+  panCategoryButton(item: AccountingRecord) {
+    if (this.isPanning) {
+      Button('删除')
+        .width(70)
+        .type(ButtonType.Normal)
+        .backgroundColor('red')
+        .fontColor('#ffffff')
+        .fontSize(16)
+        .position({ x: 92, y: -6 })
+        .zIndex(10)
+        .onClick(() => {
+          StorageUtil.deleteCurrentAccountingRecord(item);
+          promptAction.showToast({ message: `操作成功` })
+          setTimeout(() => {
+            if (!this.currentAccount?.id) {
+              return;
+            }
+            // 刷新记账列表
+            this.getCategory(this.currentAccount?.id);
+            this.isPanning = false;
+          }, 1000)
+        })
     }
   }
 
@@ -368,6 +433,10 @@ struct DetailPage {
                     // 编辑框（放在Stack最上层）
                     this.editCategoryInput(item, 'money')
                   }
+                  // 删除
+                  if (this.panJudge(item)) {
+                    this.panCategoryButton(item)
+                  }
                 }
                 .width('25%')
                 .justifyContent(FlexAlign.End)
@@ -377,10 +446,30 @@ struct DetailPage {
                       this.handleLongPress(event, item, 'money');
                     })
                 )
+
               }
               .width('100%')
               .height(32)
               .margin({ top: 4, bottom: 4 })
+              // 在Column组件上绑定旋转，通过滑动手势的滑动速度和角度修改旋转的角度
+              .translate({ x: this.panJudge(item) ? (this.offsetX < 0 ? -52 : 0) : 0, y: 0, z: 0 })
+              .gesture(
+                // 绑定拖动手势
+                PanGesture()
+                  .onActionStart((event: GestureEvent | undefined) => {
+                    this.handlePan(event, item);
+                  })// 当触发拖动手势时，根据回调函数修改组件的布局位置信息
+                  .onActionUpdate((event: GestureEvent | undefined) => {
+                    if (event) {
+                      this.offsetX = this.positionX + event.offsetX;
+                      this.offsetY = this.positionY + event.offsetY;
+                    }
+                  })
+                  .onActionEnd(() => {
+                    this.positionX = this.offsetX;
+                    this.positionY = this.offsetY;
+                  })
+              )
             }
             .width('100%')
             .padding({
@@ -392,6 +481,7 @@ struct DetailPage {
             .backgroundColor('#FFFFFF')
             .margin({ bottom: 1 }) // 添加底部边距
             .borderRadius(8) // 添加圆角
+
           })
         }
         .width('100%')
@@ -422,6 +512,9 @@ struct DetailPage {
     .onClick(() => {
       if (this.isEditing) {
         this.isEditing = false; // 点击其他区域关闭编辑
+      }
+      if (this.isPanning) {
+        this.isPanning = false; // 点击其他区域关闭左滑删除
       }
     })
   }
