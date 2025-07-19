@@ -514,6 +514,7 @@ struct DetailPage {
         this.isEditing = false; // 点击其他区域关闭编辑
       }
       if (this.isPanning) {
+        this.offsetX = 0;
         this.isPanning = false; // 点击其他区域关闭左滑删除
       }
     })
