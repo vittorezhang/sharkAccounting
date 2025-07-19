@@ -1,5 +1,5 @@
 import { preferences } from '@kit.ArkData';
-import { AccountingRecord, AccountList, AuthToken } from '../main/ets/viewModel/commonFunction';
+import { AccountingRecord, AccountList, AuthToken, currentBudgetRecord } from '../main/ets/viewModel/commonFunction';
 import { Base64Util } from './Base64Util';
 
 interface GeneratedTypeLiteralInterface {
@@ -21,12 +21,63 @@ export class StorageUtil {
 
   // -------------------记账数据 start----------------------
 
-  //  保存记账数据
+
+  // 更新或新增 当前预算
+  public static async saveCurrentBudget(record: currentBudgetRecord): Promise<void> {
+    const pref = await StorageUtil.getPreferences();
+    const value = await pref.get(StorageUtil.ACCOUNT_LIST_KEY, '');
+    const parsed = JSON.parse(value.toString()) as AccountList;
+    if (!parsed.currentBudget) {
+      return
+    }
+    const existingIndex = parsed.currentBudget.findIndex((a) => {
+      return a.accountId === record.accountId;
+    });
+    if (existingIndex >= 0) {
+      parsed.currentBudget[existingIndex] = record;
+    } else {
+      parsed.currentBudget.push(record);
+    }
+    const saveData: AccountList = {
+      currentAccountId: parsed.currentAccountId,
+      accounts: parsed.accounts.map(account => {
+        const savedAccount: AuthToken = {
+          id: account.id,
+          username: account.username,
+          password: account.password,
+          gender: account.gender,
+          token: account.token,
+          tokenExpire: account.tokenExpire,
+          timestamp: account.timestamp,
+        };
+        return savedAccount;
+      }),
+      expenseOrIncomeData: parsed.expenseOrIncomeData,
+      currentBudget: parsed.currentBudget
+    };
+
+    await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(saveData));
+    await pref.flush();
+
+  }
+
+  // 获取当前预算【当前账户】
+  public static async getCurrentBudgetRecord(accountId: string): Promise<currentBudgetRecord | null> {
+    const pref = await StorageUtil.getPreferences();
+    const value = await pref.get(StorageUtil.ACCOUNT_LIST_KEY, '');
+    const parsed = JSON.parse(value.toString()) as AccountList;
+    if (!parsed.currentBudget) {
+      return null
+    }
+    return parsed.currentBudget.find(a => a.accountId === accountId) || null;
+  }
+
+
+  // 更新或新增数据
   public static async saveAccountingRecord(record: AccountingRecord): Promise<void> {
     const pref = await StorageUtil.getPreferences();
     const value = await pref.get(StorageUtil.ACCOUNT_LIST_KEY, '');
     const parsed = JSON.parse(value.toString()) as AccountList;
-    // 更新或新增数据
     if (!parsed.expenseOrIncomeData) {
       return
     }
@@ -54,7 +105,8 @@ export class StorageUtil {
         };
         return savedAccount;
       }),
-      expenseOrIncomeData: parsed.expenseOrIncomeData
+      expenseOrIncomeData: parsed.expenseOrIncomeData,
+      currentBudget: parsed.currentBudget
     };
 
     await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(saveData));
@@ -110,7 +162,8 @@ export class StorageUtil {
         };
         return savedAccount;
       }),
-      expenseOrIncomeData: parsed.expenseOrIncomeData
+      expenseOrIncomeData: parsed.expenseOrIncomeData,
+      currentBudget: parsed.currentBudget
     };
 
     await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(saveData));
@@ -220,7 +273,8 @@ export class StorageUtil {
         };
         return savedAccount;
       }),
-      expenseOrIncomeData: accountList.expenseOrIncomeData
+      expenseOrIncomeData: accountList.expenseOrIncomeData,
+      currentBudget: accountList?.currentBudget
     };
     await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(saveData));
     await pref.flush();
@@ -236,6 +290,7 @@ export class StorageUtil {
       currentAccountId: '',
       accounts: [],
       expenseOrIncomeData: [],
+      currentBudget: [],
     };
 
     if (!value) {
@@ -247,7 +302,8 @@ export class StorageUtil {
       return {
         currentAccountId: parsed.currentAccountId || '',
         accounts: parsed.accounts || [],
-        expenseOrIncomeData: parsed.expenseOrIncomeData || []
+        expenseOrIncomeData: parsed.expenseOrIncomeData || [],
+        currentBudget: parsed.currentBudget || []
       };
     } catch (e) {
       console.error('解析账户列表失败:', e);
@@ -297,7 +353,12 @@ export class StorageUtil {
       if (accountList.expenseOrIncomeData) {
         updatedExpenseOrIncomeData =
           accountList.expenseOrIncomeData.filter((acc: AccountingRecord) => acc.id !== accountId);
-
+      }
+      let updatedBudgeData: currentBudgetRecord[] = []
+      // 预算数据
+      if (accountList.currentBudget) {
+        updatedBudgeData =
+          accountList.currentBudget.filter((acc: currentBudgetRecord) => acc.accountId !== accountId);
       }
       // 处理当前账户
       const updatedCurrentId = accountList.currentAccountId === accountId ? '' : accountList.currentAccountId;
@@ -307,6 +368,7 @@ export class StorageUtil {
         currentAccountId: updatedCurrentId,
         accounts: updatedAccounts,
         expenseOrIncomeData: updatedExpenseOrIncomeData,
+        currentBudget: updatedBudgeData,
       };
 
       await pref.put(StorageUtil.ACCOUNT_LIST_KEY, JSON.stringify(updatedList));

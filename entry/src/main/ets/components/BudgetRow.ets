@@ -9,7 +9,7 @@ export default struct BudgetRow {
     Column({ space: 12 }) {
       ForEach(this.budgetRowList, (item: budgetRowItem, index) => {
         Row() {
-          Text(item.label)
+          Text(`${item.label}：`)
             .fontSize(index === 0 ? 16 : 14)
             .fontColor(index === 0 ? 'black' : '#999999')
             .textAlign(TextAlign.Start)

@@ -49,13 +49,13 @@ export interface AuthToken {
   wechat?: string;
   emergencyContact?: string;
   timestamp: number;
-  expenseOrIncomeData?: AccountingRecord[]
 }
 
 export interface AccountList {
   currentAccountId: string;
   accounts: AuthToken[];
   expenseOrIncomeData?: AccountingRecord[]
+  currentBudget?: currentBudgetRecord[]
 }
 
 export interface RouteData {
@@ -67,6 +67,16 @@ export interface CacheItem<T = RouteData> {
   key: string;
   value: T;
   ttl?: number;
+}
+
+// 当月预算
+export interface currentBudgetRecord {
+  currentAccountId: string;
+  accountId: string; // 关联账户ID（对应AuthToken.id）
+  type?: 'year' | 'month'; //类型 年 | 月
+  amount: number; // 金额（单位：元）
+  createTime: string; // ISO格式时间戳
+  updateTime?: string; // 最后更新时间（可选）
 }
 
 // 记账记录类型

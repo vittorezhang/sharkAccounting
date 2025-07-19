@@ -1,17 +1,35 @@
 import TabBar from '../components/TabBar'
 import BudgetRow from '../components/BudgetRow'
-import { budgetRowItem, iconItem, RouteData } from '../viewModel/commonFunction'
+import {
+  AccountingRecord,
+  AuthToken,
+  budgetRowItem,
+  currentBudgetRecord,
+  iconItem,
+  RouteData
+} from '../viewModel/commonFunction'
 import { MemoryCache } from '../../../utils/MemoryCache'
+import { StorageUtil } from '../../../utils/Storage'
+import BudgetDialog from '../components/BudgetDialog';
+import { Animator, router } from '@kit.ArkUI'
 
 @Entry
 @Component
 struct FindPage {
   @State private currentIndex: number = 3
-  @State progress: number = 1.0 // 进度值(0-1)
-  private budgetRowList: budgetRowItem[] = [
-    { label: '剩余预算：', value: '999.00' },
-    { label: '本月预算：', value: '999.00' },
-    { label: '本月支出：', value: '0.00' },
+  @State currentAccount: AuthToken | null = null;
+  @State currentBudget: currentBudgetRecord | null = null;
+  @State progress: number = 0 // 进度值(0-1)
+  // 收入&支出
+  @State income: number = 0;
+  @State expenses: number = 0;
+  @State remainBudgetPercent: string = '0';
+  // 预算 弹窗状态
+  @State budgetVisible: boolean = false;
+  @State budgetRowList: budgetRowItem[] = [
+    { label: '剩余预算', value: '0.00' },
+    { label: '本月预算', value: '0.00' },
+    { label: '本月支出', value: '0.00' },
   ]
   private commonFunctionList: iconItem[] = [
     { name: '省钱优惠券', icon: 'app.media.coupon_icon' },
@@ -21,7 +39,65 @@ struct FindPage {
     { name: '汇率计算器', icon: 'app.media.exchange_icon' },
   ]
 
-  onPageShow() {
+  // 当前月份
+  private getCurrentMonth(): string {
+    const nowMonth = new Date().getMonth() + 1;
+    return nowMonth.toString().padStart(2, '0');
+  }
+
+  // 获取预算
+  private async getBudget(accountId: string, bool: boolean = false) {
+    if (!accountId) {
+      return
+    }
+    try {
+      this.currentBudget = await StorageUtil.getCurrentBudgetRecord(accountId);
+      this.budgetVisible = bool;
+      let currentMonthBudget = '';
+      let remainBudget = '';
+      if (this.currentBudget?.amount) {
+        // 本月预算
+        currentMonthBudget = String(this.currentBudget?.amount.toFixed(2))
+        // 剩余预算
+        remainBudget = String(((this.currentBudget && this.currentBudget?.amount) - this.expenses).toFixed(2))
+        // 剩余预算 与 本月预算的占比
+        const percentTotal = ((Number(remainBudget) / Number(this.currentBudget?.amount)) * 100).toFixed(2)
+        this.remainBudgetPercent = String(percentTotal)
+        // 圆环进度值 -> 转换为0-1范围的比例值
+        this.progress = Number(percentTotal) / 100;
+        console.log('this.progress', JSON.stringify(this.progress))
+      }
+      // 预算数据赋值
+      this.budgetRowList = this.budgetRowList.map((mItem: budgetRowItem) => {
+        if (mItem.label === '剩余预算') {
+          return {
+            label: mItem.label,
+            value: remainBudget || '0.00'
+          };
+        }
+        if (mItem.label === '本月预算') {
+          return {
+            label: mItem.label,
+            value: currentMonthBudget || '0.00'
+          };
+        }
+        if (mItem.label === '本月支出') {
+          return {
+            label: mItem.label,
+            value: String(this.expenses.toFixed(2)) || '0.00'
+          };
+        }
+        return mItem;
+      });
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  async onPageShow() {
+    //初始化清空【 收入、支出】
+    this.income = 0
+    this.expenses = 0
     // 临时存储路由数据
     console.log('临时存储路由数据--pages/find')
     const routeData: RouteData = {
@@ -34,6 +110,30 @@ struct FindPage {
       key: 'cache_route',
       value: routeData,
       ttl: 1200000 // 1200秒后自动删除
+    });
+    // 查当前账户信息
+    StorageUtil.getCurrentAccount().then(async account => {
+      this.currentAccount = account;
+      if (!account?.id) {
+        return;
+      }
+      const result = await StorageUtil.getCurrentAccountingRecord(account?.id);
+      if (!result) {
+        return;
+      }
+      const currentAccountData = result
+      ?.filter(a => a.currentAccountId === account?.id)
+        ?? [];
+      // 筛选收入累计、支出累计
+      currentAccountData?.forEach((mItem: AccountingRecord) => {
+        if (mItem.type === 'income') {
+          this.income += mItem?.amount || 0;
+        } else {
+          this.expenses += mItem?.amount || 0;
+        }
+      });
+      // 获取当前预算
+      this.getBudget(account?.id);
     });
   }
 
@@ -68,11 +168,22 @@ struct FindPage {
               .height(48)
               .justifyContent(FlexAlign.SpaceBetween)
               .alignItems(VerticalAlign.Center)
+              .onClick(() => {
+                // 跳转账单页面
+                return router.pushUrl({
+                  url: 'pageViews/sharkBillPage',
+                  params: {
+                    userName: this.currentAccount?.username,
+                    income: this.income,
+                    expenses: this.expenses
+                  }
+                });
+              })
 
               Row() {
                 Row() {
                   Row() {
-                    Text('06').fontWeight(500).fontSize(26)
+                    Text(this.getCurrentMonth()).fontWeight(500).fontSize(26)
                   }
                   .padding({ right: 6, top: 9 })
 
@@ -91,21 +202,21 @@ struct FindPage {
 
                 Column({ space: 12 }) {
                   Text('收入').fontSize(14).fontColor('#999999')
-                  Text('198.00').fontSize(18).fontColor('#333333')
+                  Text(`${this.income.toFixed(2)}`).fontSize(18).fontColor('#333333')
                 }
                 .alignItems(HorizontalAlign.Start)
                 .margin({ left: 8, right: 24 })
 
                 Column({ space: 12 }) {
                   Text('支出').fontSize(14).fontColor('#999999')
-                  Text('0.00').fontSize(18).fontColor('#333333')
+                  Text(`${this.expenses.toFixed(2)}`).fontSize(18).fontColor('#333333')
                 }
                 .alignItems(HorizontalAlign.Start)
                 .margin({ right: 24 })
 
                 Column({ space: 12 }) {
                   Text('结余').fontSize(14).fontColor('#999999')
-                  Text('198.00').fontSize(18).fontColor('#333333')
+                  Text(`${(this.income - this.expenses).toFixed(2)}`).fontSize(18).fontColor('#333333')
                 }
                 .alignItems(HorizontalAlign.Start)
               }
@@ -135,11 +246,11 @@ struct FindPage {
                 justifyContent: FlexAlign.SpaceBetween,
               }) {
                 Column({ space: 12 }) {
-                  Text('06月总预算')
+                  Text(`${this.getCurrentMonth()}月总预算`)
                     .fontSize(18)
                     .fontWeight(500)
                     .padding({ right: 8 })
-                    .margin({ bottom: 4 })
+                    .margin({ bottom: 8 })
                   Stack() {
                     // 背景圆环
                     Circle()
@@ -156,15 +267,19 @@ struct FindPage {
                       .fillOpacity(0)
                       .strokeWidth(8)
                       .stroke('#FFD700')
-                      .strokeDashArray([Math.PI * 80 * this.progress])
+                      .strokeDashArray([
+                        this.progress * Math.PI * 80, // 实线部分（进度）
+                        Math.PI * 80// 虚线部分（剩余）
+                      ])
+
 
                     // 进度文本（居中）
                     Column() {
                       Text('剩余')
                         .fontSize(14)
                         .fontColor('#999999')
-                      Text('100%')
-                        .fontSize(20)
+                      Text(`${this.remainBudgetPercent}%`)
+                        .fontSize(14)
                         .fontColor('#333333')
                         .margin({ top: 4 })
                     }
@@ -175,16 +290,35 @@ struct FindPage {
 
                 Column({ space: 12 }) {
                   Row() {
-                    // 右侧箭头图标
-                    Image($r('app.media.ic_arrow_right'))
-                      .width(20)
-                      .height(20)
+                    // 设置预算
+                    if (this.currentBudget) {
+                      // 右侧箭头图标
+                      Image($r('app.media.ic_arrow_right'))
+                        .width(20)
+                        .height(20)
+                        .onClick(() => {
+                          this.budgetVisible = true;
+                        })
+                    } else {
+                      Button('+ 设置预算', { type: ButtonType.Normal })
+                        .width(110)
+                        .height(28)
+                        .backgroundColor('#FFD700')
+                        .fontColor('#333333')
+                        .fontSize(16)
+                        .fontWeight(FontWeight.Medium)
+                        .onClick(() => {
+                          this.budgetVisible = true;
+                        })
+                    }
                   }
                   .width('100%')
                   .margin({ left: 2, bottom: 4 })
                   .justifyContent(FlexAlign.End)
 
-                  BudgetRow({ budgetRowList: this.budgetRowList })
+                  if (this.currentBudget?.amount != 0) {
+                    BudgetRow({ budgetRowList: this.budgetRowList })
+                  }
                 }
                 .width('64%')
               }
@@ -305,6 +439,20 @@ struct FindPage {
         .width('100%')
         .height('100%')
         .backgroundColor('#F5F5F5')
+      }
+
+      if (this.budgetVisible) {
+        BudgetDialog({
+          currentAccount: this.currentAccount,
+          currentBudget: this.currentBudget,
+          onClose: (bool: boolean) => {
+            if (!this.currentAccount?.id) {
+              return;
+            }
+            // 获取预算
+            this.getBudget(this.currentAccount?.id, bool);
+          }
+        })
       }
     }
     .width('100%')

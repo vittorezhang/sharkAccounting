@@ -16,8 +16,8 @@ export default struct DatePickerDialog {
 
   // 当前月份
   private getCurrentMonth(): string {
-    const now = new Date()
-    return `${now.getMonth() + 1}`
+    const nowMonth = new Date().getMonth() + 1;
+    return nowMonth.toString().padStart(2, '0');
   }
 
   build() {
