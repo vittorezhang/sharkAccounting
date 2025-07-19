@@ -1,5 +1,6 @@
 import { StorageUtil } from "../../../utils/Storage";
 import { AuthToken, currentBudgetRecord } from "../viewModel/commonFunction";
+import { promptAction } from "@kit.ArkUI";
 
 @Component
 export default struct BudgetDialog {
@@ -53,9 +54,11 @@ export default struct BudgetDialog {
     this.debounce(() => {
       // 保存预算
       StorageUtil.saveCurrentBudget(newRecord);
+      promptAction.showToast({ message: `操作成功` })
     }, 200); // 200ms防抖间隔
 
     setTimeout(() => {
+
       this.onClose(false);
     }, 300)
   }
