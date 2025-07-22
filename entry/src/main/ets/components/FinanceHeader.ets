@@ -9,7 +9,13 @@ export default struct FinanceHeader {
   @Prop expenses: number = 0;
   callBack: (params: dateTimeItem) => void = () => {
   };
-  @State currentYear: string = '2025年';
+
+  // 当前年
+  private getCurrentYear(): string {
+    const now = new Date()
+    return `${now.getFullYear()}`
+  }
+
   private actionBarList: actionBarItem[] = [
     { name: '账单', icon: 'app.media.detail_bill' },
     { name: '预算', icon: 'app.media.detail_budget' },
@@ -27,7 +33,7 @@ export default struct FinanceHeader {
             Column({ space: 8 }) {
               // 年份显示
               Row() {
-                Text(this.currentYear)
+                Text(this.getCurrentYear())
                   .fontSize(16)
                   .fontColor('#999999')
               }
