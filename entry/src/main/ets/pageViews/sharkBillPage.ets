@@ -1,4 +1,5 @@
 import { router } from "@kit.ArkUI";
+import { getDaysSince20250624 } from '../../../utils/DateUtil';
 
 interface RouteParams {
   userName: string;
@@ -11,8 +12,7 @@ interface RouteParams {
 struct SharkBillPage {
   // 用户信息区
   @State userName: string = '';
-  @State usageDays: number = 17;
-  @State currentMonth: string = '7月账单';
+  @State usageDays: number = 0;
   // 收入&支出区
   @State currentBalance: number = 0;
   @State lastMonthBalance: number = 0;
@@ -22,7 +22,14 @@ struct SharkBillPage {
   @State incomeWidth: number = 0;
   @State expensesWidth: number = 0;
 
+  // 当前月份
+  private getCurrentMonth(): string {
+    const nowMonth = new Date().getMonth() + 1;
+    return nowMonth.toString().padStart(2, '0');
+  }
+
   onPageShow() {
+    this.usageDays = getDaysSince20250624();
     const params = router.getParams() as RouteParams;
     if (params.userName) {
       this.userName = params.userName;
@@ -36,9 +43,9 @@ struct SharkBillPage {
         curve: Curve.EaseOut
       }, () => {
         this.incomeWidth = (Number(this.income) / this.maxValue) * 100;
-        if(Number(params.expenses) > Number(params.income)){
+        if (Number(params.expenses) > Number(params.income)) {
           this.expensesWidth = (Number(this.income) / this.maxValue) * 100;
-        }else {
+        } else {
           this.expensesWidth = (Number(this.expenses) / this.maxValue) * 100;
         }
         this.currentBalance = Number(this.income) - Number(this.expenses)
@@ -67,7 +74,7 @@ struct SharkBillPage {
 
           // 文字信息
           Column({ space: 4 }) {
-            Text(this.currentMonth)
+            Text(`${this.getCurrentMonth()}月账单`)
               .fontSize(24)
               .fontWeight(FontWeight.Bold)
               .fontColor('#333333')
