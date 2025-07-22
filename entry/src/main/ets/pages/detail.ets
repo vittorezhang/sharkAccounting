@@ -60,6 +60,9 @@ struct DetailPage {
 
   // 获取记账数据
   private async getCategory(accountId: string, searchParams?: dateTimeItem) {
+    //初始化清空【 收入、支出】
+    this.income = 0
+    this.expenses = 0
     // 查账户下所有记账数据
     if (!accountId) {
       return
@@ -209,8 +212,7 @@ struct DetailPage {
               this.debounce(() => {
                 this.currentEditCategory = item?.category;
                 this.currentEditRemark = value;
-                console.log('防抖后的值:', this.currentEditRemark || this.currentEditCategory);
-              }, 1000); // 1000ms防抖间隔
+              }, 500); // 500ms防抖间隔
             })
             .onBlur(() => {
               this.saveCategory(item);
@@ -232,8 +234,7 @@ struct DetailPage {
               // 使用防抖包装处理逻辑
               this.debounce(() => {
                 this.currentEditAmount = Number(value);
-                console.log('防抖后的值:', this.currentEditAmount);
-              }, 1000); // 1000ms防抖间隔
+              }, 500); // 500ms防抖间隔
             })
             .onBlur(() => {
               this.saveCategory(item);
@@ -348,7 +349,6 @@ struct DetailPage {
         income: this.income,
         expenses: this.expenses,
         callBack: (searchParams) => {
-          console.log('选择的时期:searchParams', JSON.stringify(searchParams))
           if (this.currentAccount?.id) {
             this.getCategory(this.currentAccount?.id, searchParams);
           }
