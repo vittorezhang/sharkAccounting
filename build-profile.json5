@@ -1,6 +1,20 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\MyPC\\.ohos\\config\\default_sharkAccounting_NLNtm3GL__mqGwMQq-g7HBO2M_uHMuKoLGX_VJjQDY4=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B64B91FD7DE64C9C31514EED1F18FABE9ED1667A05AA7A95BEE209B290F954BA93E217B24C919F0",
+          "profile": "C:\\Users\\MyPC\\.ohos\\config\\default_sharkAccounting_NLNtm3GL__mqGwMQq-g7HBO2M_uHMuKoLGX_VJjQDY4=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\MyPC\\.ohos\\config\\default_sharkAccounting_NLNtm3GL__mqGwMQq-g7HBO2M_uHMuKoLGX_VJjQDY4=.p12",
+          "storePassword": "0000001BAE5D2FBE58AC05D674876DB385345D5B0F456FFCD735929AC87FA48403E237072F3D1736215EA2"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",
