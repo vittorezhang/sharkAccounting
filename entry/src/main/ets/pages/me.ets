@@ -22,15 +22,7 @@ struct MePage {
   // 操作区
   private operateAreaList: operateAreaItem[] = operateAreaList;
 
-  aboutToAppear() {
-    // 从StorageUtil加载当前账户
-    StorageUtil.getCurrentAccount().then(account => {
-      console.log('页面我的account', JSON.stringify(account))
-      this.currentAccount = account;
-    });
-  }
-
-  onPageShow() {
+  async onPageShow() {
     // 临时存储路由数据
     console.log('临时存储路由数据--pages/me')
     const routeData: RouteData = {
@@ -43,6 +35,18 @@ struct MePage {
       key: 'cache_route',
       value: routeData,
       ttl: 1200000 // 1200秒后自动删除
+    });
+    // 从StorageUtil加载当前账户
+    StorageUtil.getCurrentAccount().then(async (account) => {
+      console.log('页面我的account', JSON.stringify(account))
+      this.currentAccount = account;
+      if (!account?.token) {
+        // 返回登录页
+        router.replaceUrl({
+          url: 'pages/Index',
+          params: { keepSession: true } // 传递保持会话参数
+        });
+      }
     });
   }
 
