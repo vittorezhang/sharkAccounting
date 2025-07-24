@@ -19,7 +19,7 @@ struct FindPage {
   @State private currentIndex: number = 3
   @State currentAccount: AuthToken | null = null;
   @State currentBudget: currentBudgetRecord | null = null;
-  @State progress: number = 0 // 进度值(0-1)
+  @State progress: number = 0 // 圆环进度值
   // 收入&支出
   @State income: number = 0;
   @State expenses: number = 0;
@@ -63,8 +63,8 @@ struct FindPage {
         // 剩余预算 与 本月预算的占比
         const percentTotal = ((Number(remainBudget) / Number(this.currentBudget?.amount)) * 100).toFixed(2)
         this.remainBudgetPercent = String(percentTotal)
-        // 圆环进度值 -> 转换为0-1范围的比例值
-        this.progress = Number(percentTotal) / 100;
+        // 圆环进度值
+        this.progress = Number(percentTotal);
         console.log('this.progress', JSON.stringify(this.progress))
       }
       // 预算数据赋值
@@ -201,22 +201,22 @@ struct FindPage {
                 .padding({ top: 12 })
 
                 Column({ space: 12 }) {
-                  Text('收入').fontSize(14).fontColor('#999999')
-                  Text(`${this.income.toFixed(2)}`).fontSize(18).fontColor('#333333')
+                  Text('收入').fontSize(16).fontColor('#999999')
+                  Text(`${this.income.toFixed(2)}`).fontSize(14).fontColor('#333333').wordBreak(WordBreak.BREAK_ALL).width('15%')
                 }
                 .alignItems(HorizontalAlign.Start)
                 .margin({ left: 8, right: 24 })
 
                 Column({ space: 12 }) {
-                  Text('支出').fontSize(14).fontColor('#999999')
-                  Text(`${this.expenses.toFixed(2)}`).fontSize(18).fontColor('#333333')
+                  Text('支出').fontSize(16).fontColor('#999999')
+                  Text(`${this.expenses.toFixed(2)}`).fontSize(14).fontColor('#333333').wordBreak(WordBreak.BREAK_ALL).width('15%')
                 }
                 .alignItems(HorizontalAlign.Start)
                 .margin({ right: 24 })
 
                 Column({ space: 12 }) {
-                  Text('结余').fontSize(14).fontColor('#999999')
-                  Text(`${(this.income - this.expenses).toFixed(2)}`).fontSize(18).fontColor('#333333')
+                  Text('结余').fontSize(16).fontColor('#999999')
+                  Text(`${(this.income - this.expenses).toFixed(2)}`).fontSize(14).fontColor('#333333').wordBreak(WordBreak.BREAK_ALL).width('15%')
                 }
                 .alignItems(HorizontalAlign.Start)
               }
@@ -252,25 +252,11 @@ struct FindPage {
                     .padding({ right: 8 })
                     .margin({ bottom: 8 })
                   Stack() {
-                    // 背景圆环
-                    Circle()
-                      .width(80)
-                      .height(80)
-                      .fillOpacity(0)
-                      .strokeWidth(8)
-                      .stroke('#F0F0F0')
-
-                    // 进度圆环（动态）
-                    Circle()
-                      .width(80)
-                      .height(80)
-                      .fillOpacity(0)
-                      .strokeWidth(8)
-                      .stroke('#FFD700')
-                      .strokeDashArray([
-                        this.progress * Math.PI * 80, // 实线部分（进度）
-                        Math.PI * 80// 虚线部分（剩余）
-                      ])
+                    Row({ space: 40 }) {
+                      Progress({ value: 0, total: 100, type: ProgressType.Ring })
+                        .color('#FFD700').value(this.progress).width(100)
+                        .style({ strokeWidth: 10, scaleCount: 100, scaleWidth: 10 })
+                    }
 
 
                     // 进度文本（居中）
