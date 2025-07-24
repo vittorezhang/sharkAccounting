@@ -7,6 +7,7 @@ import font from '@ohos.font';
 import { promptAction, router } from '@kit.ArkUI';
 import BadgeDialog from '../components/BadgeDialog';
 import { DateUtil } from '../../../utils/DateUtil';
+import text from '@ohos.graphics.text';
 
 interface editPositionItem {
   x: number;
@@ -358,134 +359,146 @@ struct DetailPage {
 
       // 2. 主内容区
       Scroll() {
-        Column() {
-          ForEach(this.transactions, (item: AccountingRecord) => {
-            Column({ space: 8 }) {
-              Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                Row() {
-                  Text(DateUtil.formatCST(item.createTime))
-                    .fontSize(16)
-                    .fontColor('#999999')
-                    .fontWeight(500)
+        if (this.transactions.length == 0) {
+          Column() {
+            Text('\ue601')
+              .fontFamily('myFont')
+              .fontSize(200)
+              .fontColor('#3333333')
+          }
+          .width('100%')
+          .height('100%')
+          .justifyContent(FlexAlign.Center)
+        } else {
+          Column() {
+            ForEach(this.transactions, (item: AccountingRecord) => {
+              Column({ space: 8 }) {
+                Flex({ justifyContent: FlexAlign.SpaceBetween }) {
+                  Row() {
+                    Text(DateUtil.formatCST(item.createTime))
+                      .fontSize(16)
+                      .fontColor('#999999')
+                      .fontWeight(500)
+                  }
+
+                  Row() {
+                    Text(`${item.type === 'expense' ? '支出' : '收入'}:${item.amount}`)
+                      .fontSize(14)
+                      .fontColor('#999999')
+                  }
                 }
+                .height(24)
 
-                Row() {
-                  Text(`${item.type === 'expense' ? '支出' : '收入'}:${item.amount}`)
-                    .fontSize(14)
-                    .fontColor('#999999')
-                }
-              }
-              .height(24)
+                Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
+                  Row() {
+                    Text(item.selectedIcon)
+                      .fontFamily('myFont')
+                      .fontSize(20)
+                      .fontColor('#333333')
+                  }
+                  .width(32)
+                  .height(32)
+                  .justifyContent(FlexAlign.Center)
+                  .backgroundColor('#FFD700')
+                  .borderRadius('50%')
+                  .onClick(() => {
+                    console.log('item', JSON.stringify(item))
+                    // 跳转记账页面
+                    router.replaceUrl({
+                      url: 'pages/account',
+                      params: {
+                        currentCategoryId: item.id,
+                        currentCategory: item.category,
+                        currentIcon: item.selectedIcon,
+                      }
+                    });
+                  })
 
-              Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
-                Row() {
-                  Text(item.selectedIcon)
-                    .fontFamily('myFont')
-                    .fontSize(20)
-                    .fontColor('#333333')
-                }
-                .width(32)
-                .height(32)
-                .justifyContent(FlexAlign.Center)
-                .backgroundColor('#FFD700')
-                .borderRadius('50%')
-                .onClick(() => {
-                  console.log('item', JSON.stringify(item))
-                  // 跳转记账页面
-                  router.replaceUrl({
-                    url: 'pages/account',
-                    params: {
-                      currentCategoryId: item.id,
-                      currentCategory: item.category,
-                      currentIcon: item.selectedIcon,
-                    }
-                  });
-                })
+                  Row() {
+                    Text(item.remark || item.category)
+                      .fontSize(16)
+                  }
+                  .width('70%')
+                  .padding({ left: 16 })
+                  .gesture(
+                    LongPressGesture({ repeat: false })
+                      .onAction((event: GestureEvent) => {
+                        this.handleLongPress(event, item, 'text');
+                      })
+                  )
 
-                Row() {
-                  Text(item.remark || item.category)
-                    .fontSize(16)
-                }
-                .width('70%')
-                .padding({ left: 16 })
-                .gesture(
-                  LongPressGesture({ repeat: false })
-                    .onAction((event: GestureEvent) => {
-                      this.handleLongPress(event, item, 'text');
-                    })
-                )
-
-                // 编辑分类或备注
-                if (this.currentEditCategoryId === item.id && this.currentEditCreateTime === item.createTime &&
-                  this.currentEditCategory == item.category) {
-                  // 编辑框（放在Stack最上层）
-                  this.editCategoryInput(item, 'text')
-                }
-
-
-                Row() {
-                  Text(`${item.type === 'expense' ? '-' : '+'}${item.amount}`)
-                    .fontSize(16)
-                    .fontColor('#333333')
-                  // 编辑金额
+                  // 编辑分类或备注
                   if (this.currentEditCategoryId === item.id && this.currentEditCreateTime === item.createTime &&
-                    this.currentEditAmount == item.amount) {
+                    this.currentEditCategory == item.category) {
                     // 编辑框（放在Stack最上层）
-                    this.editCategoryInput(item, 'money')
+                    this.editCategoryInput(item, 'text')
                   }
-                  // 删除
-                  if (this.panJudge(item)) {
-                    this.panCategoryButton(item)
+
+
+                  Row() {
+                    Text(`${item.type === 'expense' ? '-' : '+'}${item.amount}`)
+                      .fontSize(16)
+                      .fontColor('#333333')
+                    // 编辑金额
+                    if (this.currentEditCategoryId === item.id && this.currentEditCreateTime === item.createTime &&
+                      this.currentEditAmount == item.amount) {
+                      // 编辑框（放在Stack最上层）
+                      this.editCategoryInput(item, 'money')
+                    }
+                    // 删除
+                    if (this.panJudge(item)) {
+                      this.panCategoryButton(item)
+                    }
                   }
+                  .width('25%')
+                  .justifyContent(FlexAlign.End)
+                  .gesture(
+                    LongPressGesture({ repeat: false })
+                      .onAction((event: GestureEvent) => {
+                        this.handleLongPress(event, item, 'money');
+                      })
+                  )
+
                 }
-                .width('25%')
-                .justifyContent(FlexAlign.End)
+                .width('100%')
+                .height(32)
+                .margin({ top: 4, bottom: 4 })
+                // 在Column组件上绑定旋转，通过滑动手势的滑动速度和角度修改旋转的角度
+                .translate({ x: this.panJudge(item) ? (this.offsetX < 0 ? -52 : 0) : 0, y: 0, z: 0 })
                 .gesture(
-                  LongPressGesture({ repeat: false })
-                    .onAction((event: GestureEvent) => {
-                      this.handleLongPress(event, item, 'money');
+                  // 绑定拖动手势
+                  PanGesture()
+                    .onActionStart((event: GestureEvent | undefined) => {
+                      this.handlePan(event, item);
+                    })// 当触发拖动手势时，根据回调函数修改组件的布局位置信息
+                    .onActionUpdate((event: GestureEvent | undefined) => {
+                      if (event) {
+                        this.offsetX = this.positionX + event.offsetX;
+                        this.offsetY = this.positionY + event.offsetY;
+                      }
+                    })
+                    .onActionEnd(() => {
+                      this.positionX = this.offsetX;
+                      this.positionY = this.offsetY;
                     })
                 )
-
               }
               .width('100%')
-              .height(32)
-              .margin({ top: 4, bottom: 4 })
-              // 在Column组件上绑定旋转，通过滑动手势的滑动速度和角度修改旋转的角度
-              .translate({ x: this.panJudge(item) ? (this.offsetX < 0 ? -52 : 0) : 0, y: 0, z: 0 })
-              .gesture(
-                // 绑定拖动手势
-                PanGesture()
-                  .onActionStart((event: GestureEvent | undefined) => {
-                    this.handlePan(event, item);
-                  })// 当触发拖动手势时，根据回调函数修改组件的布局位置信息
-                  .onActionUpdate((event: GestureEvent | undefined) => {
-                    if (event) {
-                      this.offsetX = this.positionX + event.offsetX;
-                      this.offsetY = this.positionY + event.offsetY;
-                    }
-                  })
-                  .onActionEnd(() => {
-                    this.positionX = this.offsetX;
-                    this.positionY = this.offsetY;
-                  })
-              )
-            }
-            .width('100%')
-            .padding({
-              left: 16,
-              right: 16,
-              top: 8,
-              bottom: 8
-            }) // 调整内边距
-            .backgroundColor('#FFFFFF')
-            .margin({ bottom: 1 }) // 添加底部边距
-            .borderRadius(8) // 添加圆角
+              .padding({
+                left: 16,
+                right: 16,
+                top: 8,
+                bottom: 8
+              }) // 调整内边距
+              .backgroundColor('#FFFFFF')
+              .margin({ bottom: 1 }) // 添加底部边距
+              .borderRadius(8) // 添加圆角
 
-          })
+            })
+          }
+          .width('100%')
+          .margin({ top: 64, bottom: 56 })
         }
-        .width('100%')
-        .margin({ top: 64, bottom: 56 })
       }
       .height('100%')
       .scrollable(ScrollDirection.Vertical)

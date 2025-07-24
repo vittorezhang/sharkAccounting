@@ -6,6 +6,13 @@
   "description": "鲨鱼记账",
   "glyphs": [
     {
+      "icon_id": "2505120",
+      "name": "暂无数据",
+      "font_class": "zanwushuju",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
       "icon_id": "5881174",
       "name": "清除",
       "font_class": "qingchu",
